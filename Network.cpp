@@ -1,7 +1,8 @@
 #include "Network.h"
 #include "Reading.h"
+#include "WIFI-Secret.h"
 
-char ssid[] = WIFI;
+char ssid[] = SSID;
 char password[] = PASSWORD;
 
 IPAddress ip(192, 168, 1, 212);

@@ -11,11 +11,10 @@
 Reading::Reading()
 {
 	int c = 0;
-
-	Load.begin(0x40);
-	Solar1.begin(0x44);
-	Solar2.begin(0x45);
-	Batt.begin(0x41);
+	Load.begin();
+	Solar1.begin();
+	Solar2.begin();
+	Batt.begin();
 
 	Load.setCalibration_32V_2A();
 	Solar1.setCalibration_32V_1A();
@@ -23,28 +22,29 @@ Reading::Reading()
 	Batt.setCalibration_32V_2A();
 
 	Serial.println("Starting BME");
-	while (!bme.begin() & c < 10) {
+	while (!bme.begin(0x76) & c < 10) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
 		c++;
 	}
 	if (c < 10)
-		Serial.println("BMP280 sensor OK !");
+		Serial.println("BME280 sensor OK !");
 	else
-		Serial.println("BMP280 ERROR starting device");
+		Serial.println("BME280 ERROR starting device");
 
-	BME280I2C::Settings settings(
-		BME280::OSR_X1,
-		BME280::OSR_X1,
-		BME280::OSR_X1,
-		BME280::Mode_Normal,
-		BME280::StandbyTime_50ms,
-		BME280::Filter_4,
-		BME280::SpiEnable_False,
-		0x76 // I2C address. I2C specific.
-	);
+	bme.setSampling(
+		Adafruit_BME280::MODE_NORMAL,
+		Adafruit_BME280::SAMPLING_X1,
+		Adafruit_BME280::SAMPLING_X1,
+		Adafruit_BME280::SAMPLING_X1,
+		Adafruit_BME280::FILTER_X4,
+		Adafruit_BME280::STANDBY_MS_62_5);
 
-	bme.setSettings(settings);
+//		Adafruit_BME280::StandbyTime_50ms,
+//		Adafruit_BME280::SpiEnable_False,
+//		0x76 // I2C address. I2C specific.
+
+	Serial.println("Completed Startup");
 }
 
 void Reading::Get_power()
@@ -62,7 +62,9 @@ void Reading::Get_power()
 
 void Reading::Get_weather()
 {
-	bme.read(Press, Temp, Humid, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
-//	bme.read(Press, Temp, Humid);
+//	bme.read(Press, Temp, Humid, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
+	Press = bme.readPressure() / 100.0F;
+	Temp = bme.readTemperature();
+	Humid = bme.readHumidity();
 }
 

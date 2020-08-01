@@ -11,7 +11,7 @@ IPAddress mask(255, 255, 255, 0);
 
 WiFiClient ethClient;
 
-IPAddress MQTTServer(192, 168, 1, 4);
+IPAddress MQTTServer(192, 168, 1, 20);
 PubSubClient MQTTclient(ethClient);
 
 
@@ -97,7 +97,7 @@ void MQTT_Setup()
 	clientId += String(random(0xffff), HEX);
 	while ((!MQTTclient.connected()) && (c++ < 10))
 	{
-		Serial.println("Attempting MQTT connection...");
+		Serial.print("Attempting MQTT connection... : ");
 		// Attempt to connect
 		if (MQTTclient.connect(clientId.c_str()))
 		{
@@ -105,6 +105,7 @@ void MQTT_Setup()
 			return;
 		}
 		delay(1000);
+		Serial.println("ERROR");
 	}
 	Serial.println("Unable to connect to MQTT, ESP is restarting.");
 	ESP.restart();

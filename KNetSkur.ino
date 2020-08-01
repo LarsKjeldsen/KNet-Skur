@@ -1,7 +1,9 @@
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+#include <Adafruit_INA219.h>
+#include <PubSubClient.h>
 #include <Ticker.h>
 #include <Wire.h>
-#include <BME280I2C.h>
-#include <BME280.h>
 #include "Reading.h"
 #include "Network.h"
 #include "HW.h"
@@ -57,7 +59,6 @@ void setup()
 
 	reading->Get_weather();
 	reading->Get_power();
-
 	Send_reading(reading);
 	Second_LightCountdown = 120;
 }

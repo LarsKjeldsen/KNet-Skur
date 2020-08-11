@@ -22,7 +22,7 @@ Reading::Reading()
 	Batt.setCalibration_32V_2A();
 
 	Serial.println("Starting BME");
-	while (!bme.begin(0x76) & c < 10) {
+	while ((!bme.begin(0x76)) && (c < 10)) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
 		c++;

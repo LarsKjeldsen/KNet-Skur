@@ -105,9 +105,6 @@ void ICACHE_RAM_ATTR  TimerRoutine_10ms()
 
 		if (Second_LightCountdown > 0)
 			Second_LightCountdown--;
-
-
-
 	}
 
 

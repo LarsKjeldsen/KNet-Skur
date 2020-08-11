@@ -30,12 +30,12 @@ void WiFi_Setup()
 		ESP.restart();
 	}
 
-	while (WiFi.status() != WL_CONNECTED && i++ <= 100) {
-		delay(50);
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(1000);
 		Serial.print(".");
+		if (i++ >= 10)
+			ESP.restart();
 	}
-	if (i > 100)
-		ESP.restart();
 
 
 	 ArduinoOTA.setHostname("KNetSkur");
@@ -92,23 +92,22 @@ void MQTT_Setup()
 
 	String IP = WiFi.localIP().toString();
 	MQTTclient.setServer(MQTTServer, 1883);
-
 	String clientId = "Skur-"+IP+"-";
 	clientId += String(random(0xffff), HEX);
-	while ((!MQTTclient.connected()) && (c++ < 10))
+
+	while (!MQTTclient.connected())
 	{
 		Serial.print("Attempting MQTT connection... : ");
 		// Attempt to connect
-		if (MQTTclient.connect(clientId.c_str()))
-		{
-			Serial.println("connected");
-			return;
-		}
+		MQTTclient.connect(clientId.c_str());
+
 		delay(1000);
 		Serial.println("ERROR");
+		if (c++ >= 10) {
+			Serial.println("Unable to connect to MQTT, ESP is restarting.");
+			ESP.restart();
+		}
 	}
-	Serial.println("Unable to connect to MQTT, ESP is restarting.");
-	ESP.restart();
 }
 
 

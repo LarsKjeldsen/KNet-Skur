@@ -6,19 +6,6 @@
 #include "Reading.h"
 #include "Arduino.h"
 #include <PubSubClient.h>
-#include <WiFiUdp.h>
-#include <WiFiServer.h>
-#include <WiFiClientSecure.h>
-#include <WiFiClient.h>
-#include <ESP8266WiFiType.h>
-#include <ESP8266WiFiSTA.h>
-#include <ESP8266WiFiScan.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266WiFiGeneric.h>
-#include <ESP8266WiFiAP.h>
-#include <ESP8266WiFi.h>
-#include <ArduinoOTA.h>
-
 
 void WiFi_Setup();
 void MQTT_Setup();

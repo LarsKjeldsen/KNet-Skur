@@ -1,14 +1,30 @@
-#include <LCD.h>
-#include <LiquidCrystal_I2C.h>
-#include <FastIO.h>
-#include <SPI.h>
+#include <ESPmDNS.h>
+#include <Update.h>
+#include <HttpsOTAUpdate.h>
+#include <ArduinoOTA.h>
 #include <Adafruit_SPIDevice.h>
 #include <Adafruit_I2CRegister.h>
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_BusIO_Register.h>
 #include <Adafruit_Sensor.h>
+#include <AsyncUDP.h>
+#include <WiFi.h>
+#include <WiFiType.h>
+#include <WiFiUdp.h>
+#include <WiFiSTA.h>
+#include <WiFiServer.h>
+#include <WiFiScan.h>
+#include <WiFiMulti.h>
+#include <WiFiGeneric.h>
+#include <WiFiClient.h>
+#include <WiFiAP.h>
+#include <ETH.h>
+#include <SimpleBLE.h>
+#include <LiquidCrystal_I2C.h>
+#include <SPI.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_INA219.h>
+#include <INA3221.h>
 #include <PubSubClient.h>
 #include <Ticker.h>
 #include <Wire.h>
@@ -16,19 +32,6 @@
 #include "Network.h"
 #include "HW.h"
 #include "Display.h"
-#include <WiFiUdp.h>
-#include <WiFiServer.h>
-#include <WiFiClientSecure.h>
-#include <WiFiClient.h>
-#include <ESP8266mDNS.h>
-#include <ESP8266WiFiType.h>
-#include <ESP8266WiFiSTA.h>
-#include <ESP8266WiFiScan.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266WiFiGeneric.h>
-#include <ESP8266WiFiAP.h>
-#include <ESP8266WiFi.h>
-#include <ArduinoOTA.h>
 
 extern volatile int32_t Second_CountDown;
 extern volatile int32_t Second_LightCountdown;
@@ -52,7 +55,8 @@ void setup()
 
 	Serial.begin(115200);
 
-	Wire.begin(SDA, SCL);
+	Wire1.begin(SDA, SCL);
+	
 	Display_Setup();
 	Display_Text("   Starter BME", 1);
 	HW_setup();
@@ -74,8 +78,6 @@ void setup()
 
 void loop()
 {
-	ArduinoOTA.handle();
-
 	enum  Event ev;
 	bool Tick;
 
@@ -84,10 +86,10 @@ void loop()
 	event = EV_NONE;
 	SecTick = false;
 
+	ArduinoOTA.handle();
+
 	if (Second_CountDown == 0)
-		RELAY_LOAD_OFF;
-	else
-		RELAY_LOAD_ON;
+		;
 
 	if (ev == EV_S1_SHORT)
 		Second_LightCountdown = LIGHT_DELAY_SECOND;
@@ -95,16 +97,12 @@ void loop()
 	if (ev == EV_S1_LONG)
 		Second_LightCountdown = 0;
 
-	if (Second_LightCountdown)
-		RELAY_LIGHT_ON;
-	else
-		RELAY_LIGHT_OFF;
-
-	ControlBacklight(Second_LightCountdown);
-
+	
 	if (Tick)
 	{
 //		Display_buttoms(ev, SW1_Pin, SW2_Pin);
+
+		ControlBacklight(Second_LightCountdown);
 
 		reading->Get_power();
 		reading->Get_weather();
@@ -124,5 +122,5 @@ void loop()
 		Second_CountDown_Last = Second_CountDown;
 	}
 
-	delay(100);
+	delay(500);
 }

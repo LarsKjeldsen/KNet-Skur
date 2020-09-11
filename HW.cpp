@@ -31,62 +31,10 @@ long Timer_counter = 0;
 
 void HW_setup()
 {
-	pinMode(RELAY_LOAD, OUTPUT);
-	pinMode(RELAY_LIGHT, OUTPUT);
-
-	RELAY_LIGHT_OFF;
-	RELAY_LOAD_OFF;
-
-	pinMode(encoder0PinA, INPUT_PULLUP);
-	pinMode(encoder0PinB, INPUT_PULLUP);
-
-	attachInterrupt(encoder0PinA, doEncoder, CHANGE);
-	attachInterrupt(encoder0PinB, doEncoder, CHANGE);
-
-	pinMode(SW1_Pin, INPUT_PULLUP);
-	pinMode(SW2_Pin, INPUT_PULLUP);
+//	pinMode(SW1_Pin, INPUT_PULLUP);
+//	pinMode(SW2_Pin, INPUT_PULLUP);
 
 	Ticker_10ms.attach_ms(10, TimerRoutine_10ms);
-}
-
-
-void ICACHE_RAM_ATTR  doEncoder()
-{
-	int MSB = digitalRead(encoder0PinA); //MSB = most significant bit
-	int LSB = digitalRead(encoder0PinB); //LSB = least significant bit
-
-	int encoded = (MSB << 1) | LSB; //converting the 2 pin value to single number
-	int sum = (lastEncoded << 2) | encoded; //adding it to the previous encoded value
-
-	if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011)
-	{
-		if (Second_CountDown < 600)
-		{
-			Second_CountDown += 30; Second_CountDown -= Second_CountDown % 30;
-		}
-		else
-		{
-			Second_CountDown += 120; Second_CountDown -= Second_CountDown % 120;
-		}
-	}
-	if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000)
-	{
-		if (Second_CountDown < 600)
-		{
-			Second_CountDown -= 30; Second_CountDown -= Second_CountDown % 30;
-		}
-		else
-		{
-			Second_CountDown -= 120; Second_CountDown -= Second_CountDown % 120;
-		}
-	}
-
-	if (Second_CountDown < 0)
-		Second_CountDown = 0;
-	if (Second_CountDown > 24 * 60 * 60)
-		Second_CountDown = 24 * 60 * 60 - 1;
-
-	lastEncoded = encoded; //store this value for next time
 }
 
 

@@ -7,24 +7,14 @@
 // HW
 #define NUM_SW	2
 
-#define SW1_Pin D4 
-#define SW2_Pin D3 
+#define SW1_Pin 12 
+#define SW2_Pin 12 
 
-#define SCL D1
-#define SDA D2
+#define SDA 18
+#define SCL 19
 
-// Rotary switch
-#define encoder0PinA   D6
-#define encoder0PinB   D7
-
-// Relays
-#define RELAY_LOAD D0
-#define RELAY_LIGHT D8
-
-#define RELAY_LOAD_ON (digitalWrite(RELAY_LOAD, HIGH))
-#define RELAY_LOAD_OFF (digitalWrite(RELAY_LOAD, LOW))
-#define RELAY_LIGHT_ON (digitalWrite(RELAY_LIGHT, HIGH))
-#define RELAY_LIGHT_OFF (digitalWrite(RELAY_LIGHT, LOW))
+#define SDA_INA33221 22
+#define SCL_INA33221 23
 
 
 #define SW1     (digitalRead(SW1_Pin) == 1)
@@ -46,7 +36,6 @@ enum Event {
 
 void HW_setup();
 void ICACHE_RAM_ATTR TimerRoutine_10ms();
-void ICACHE_RAM_ATTR doEncoder();
 
 #endif
 

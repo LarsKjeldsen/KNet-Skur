@@ -4,10 +4,22 @@
 #define _DISPLAY_h
 
 #include "Arduino.h"
+#include "HW.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "Reading.h"
-#include "HW.h"
+
+extern volatile bool S1_LONG;
+extern volatile bool S1_PRESSED;
+extern volatile bool S2_LONG;
+extern volatile bool S2_PRESSED;
+extern volatile bool S3_LONG;
+extern volatile bool S3_PRESSED;
+extern volatile bool S4_LONG;
+extern volatile bool S4_PRESSED;
+extern volatile bool S5_LONG;
+extern volatile bool S5_PRESSED;
+
 
 void Display_Setup();
 

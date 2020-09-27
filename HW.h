@@ -12,16 +12,6 @@
 #define TOUCH4_Pin 12
 #define TOUCH5_Pin 14
 
-volatile bool S1_LONG;
-volatile bool S1_PRESSED;
-volatile bool S2_LONG;
-volatile bool S2_PRESSED;
-volatile bool S3_LONG;
-volatile bool S3_PRESSED;
-volatile bool S4_LONG;
-volatile bool S4_PRESSED;
-volatile bool S5_LONG;
-volatile bool S5_PRESSED;
 
 enum Event {
 	EV_NONE,
@@ -38,13 +28,25 @@ enum Event {
 	EV_TIMEOUT,
 };
 
-volatile enum Event event;
-volatile bool SecTick;
+extern volatile bool S1_LONG;
+extern volatile bool S1_PRESSED;
+extern volatile bool S2_LONG;
+extern volatile bool S2_PRESSED;
+extern volatile bool S3_LONG;
+extern volatile bool S3_PRESSED;
+extern volatile bool S4_LONG;
+extern volatile bool S4_PRESSED;
+extern volatile bool S5_LONG;
+extern volatile bool S5_PRESSED;
 
-volatile uint16_t Count_10ms;
-volatile uint16_t Count_Sec = 59;
-volatile int32_t Second_CountDown;
-volatile int32_t Second_LightCountdown;
+
+extern volatile enum Event event;
+extern volatile bool SecTick;
+
+extern volatile uint16_t Count_10ms;
+extern volatile uint16_t Count_Sec;
+extern volatile int32_t Second_CountDown;
+extern volatile int32_t Second_LightCountdown;
 
 
 // Wire1

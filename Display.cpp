@@ -1,5 +1,4 @@
 #include "Display.h"
-#include "HW.h"
 
 LiquidCrystal_I2C lcd(0x3F, 40, 4);
 
@@ -71,7 +70,7 @@ void Display_Weather(Reading * r)
 void Display_buttoms(Event e, bool s1, bool s2)
 {
 	lcd.setCursor(16, 2);
-	if (S1_LONG)    lcd.print('L'); else lcd.print(' ');
+//	if (S1_LONG)    lcd.print('L'); else lcd.print(' ');
 	if (S1_PRESSED) lcd.print('S'); else lcd.print(' ');
 	if (S2_LONG)    lcd.print('L'); else lcd.print(' ');
 	if (S2_PRESSED) lcd.print('S'); else lcd.print(' ');

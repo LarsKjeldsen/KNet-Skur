@@ -5,6 +5,26 @@
 #include "HW.h"
 #include <Ticker.h>
 
+volatile bool S1_LONG;
+volatile bool S1_PRESSED;
+volatile bool S2_LONG;
+volatile bool S2_PRESSED;
+volatile bool S3_LONG;
+volatile bool S3_PRESSED;
+volatile bool S4_LONG;
+volatile bool S4_PRESSED;
+volatile bool S5_LONG;
+volatile bool S5_PRESSED;
+
+
+volatile enum Event event;
+volatile bool SecTick;
+
+volatile uint16_t Count_10ms;
+volatile uint16_t Count_Sec = 59;
+volatile int32_t Second_CountDown;
+volatile int32_t Second_LightCountdown;
+
 volatile int lastEncoded = 0;
 volatile long encoderValue = 0;
 long lastencoderValue = 0;

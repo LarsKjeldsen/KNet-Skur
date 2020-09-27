@@ -28,15 +28,14 @@
 #include <PubSubClient.h>
 #include <Ticker.h>
 #include <Wire.h>
+#include "HW.h"
 #include "Reading.h"
 #include "Network.h"
-#include "HW.h"
 #include "Display.h"
 
 
 int32_t Second_CountDown_Last;
 Reading *reading;
-
 
 #define LIGHT_DELAY_SECOND  600  // 10 min.
 

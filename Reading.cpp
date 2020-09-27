@@ -61,11 +61,15 @@ void Reading::Get_power()
 	load2_mA = ina3221.getCurrent_mA(2);
 	load3_mA = ina3221.getCurrent_mA(3);
 	Load_V = ina3221.getBusVoltage_V(1);
-
-	Serial.print("Solar1_V      = "); Serial.println(Solar1_V);
-	Serial.print("current_mA1   = "); Serial.println(load1_mA);
-	Serial.print("current_mA2   = "); Serial.println(load2_mA);
-	Serial.print("current_mA3   = "); Serial.println(load3_mA); Serial.println();
+/*
+	Serial.print("Solar1_V      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
+	Serial.print("Solar2_V      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);
+	Serial.print("Solar3_V      = "); Serial.print(Solar3_mA);  Serial.print(" / "); Serial.println(Solar3_V);
+	Serial.print("Battery_V     = "); Serial.print(Battery_mA); Serial.print(" / "); Serial.println(Battery_V);
+	Serial.print("current_mA1   = "); Serial.print(load1_mA);  Serial.print(" / "); Serial.println(Load_V);
+	Serial.print("current_mA2   = "); Serial.print(load2_mA);  Serial.print(" / "); Serial.println();
+	Serial.print("current_mA3   = "); Serial.print(load3_mA);  Serial.print(" / "); Serial.println();
+*/
 }
 
 

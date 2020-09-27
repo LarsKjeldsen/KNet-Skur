@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KNetSkur", "KNetSkur.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LiquidCrystal_I2C-master-1.1.4", "Libraries\LiquidCrystal_I2C-master\1.1.4\LiquidCrystal_I2C-master\LiquidCrystal_I2C-master-1.1.4.vcxitems", "{D236F9DE-1CAF-4953-9534-908FDA4E0D53}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Libraries\LiquidCrystal_I2C-master\1.1.4\LiquidCrystal_I2C-master\LiquidCrystal_I2C-master-1.1.4.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		Libraries\LiquidCrystal_I2C-master\1.1.4\LiquidCrystal_I2C-master\LiquidCrystal_I2C-master-1.1.4.vcxitems*{d236f9de-1caf-4953-9534-908fda4e0d53}*SharedItemsImports = 9
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86

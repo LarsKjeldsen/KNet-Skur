@@ -24,7 +24,7 @@
 #include <SPI.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_INA219.h>
-#include <INA3221.h>
+#include "INA3221.h"
 #include <PubSubClient.h>
 #include <Ticker.h>
 #include <Wire.h>
@@ -33,16 +33,6 @@
 #include "HW.h"
 #include "Display.h"
 
-extern volatile int32_t Second_CountDown;
-extern volatile int32_t Second_LightCountdown;
-extern volatile uint16_t Count_Sec;
-
-extern volatile enum Event event;
-extern volatile bool SecTick;
-extern volatile bool S1_LONG;
-extern volatile bool S1_PRESSED;
-extern volatile bool S2_LONG;
-extern volatile bool S2_PRESSED;
 
 int32_t Second_CountDown_Last;
 Reading *reading;
@@ -56,7 +46,8 @@ void setup()
 	Serial.begin(115200);
 
 	Wire1.begin(SDA, SCL);
-	
+	Wire.begin(SDA_INA33221, SCL_INA33221);
+
 	Display_Setup();
 	Display_Text("   Starter BME", 1);
 	HW_setup();
@@ -74,6 +65,8 @@ void setup()
 	reading->Get_power();
 	Send_reading(reading);
 	Second_LightCountdown = 120;
+
+	pinMode(16, OUTPUT);
 }
 
 void loop()
@@ -88,6 +81,8 @@ void loop()
 
 	ArduinoOTA.handle();
 
+	reading->Get_power();
+
 	if (Second_CountDown == 0)
 		;
 
@@ -97,10 +92,16 @@ void loop()
 	if (ev == EV_S1_LONG)
 		Second_LightCountdown = 0;
 
+	/*
+	Serial.print(SW1); Serial.print(":"); Serial.print(SW2); Serial.print(":"); Serial.print(SW3); Serial.print(":"); Serial.print(SW4); Serial.print(":"); Serial.print(SW5); Serial.print("  -  ");
+	Serial.print(S1_PRESSED); Serial.print(":"); Serial.print(S2_PRESSED); Serial.print(":"); Serial.print(S3_PRESSED); Serial.print(":"); Serial.print(S4_PRESSED); Serial.print(":"); Serial.print(S5_PRESSED); Serial.print("  -  ");
+	Serial.print(S1_LONG); Serial.print(":"); Serial.print(S2_LONG); Serial.print(":"); Serial.print(S3_LONG); Serial.print(":"); Serial.print(S4_LONG); Serial.print(":"); Serial.println(S5_LONG);
+	*/
+
 	
 	if (Tick)
 	{
-//		Display_buttoms(ev, SW1_Pin, SW2_Pin);
+		Display_buttoms(ev, TOUCH1_Pin, TOUCH2_Pin);
 
 		ControlBacklight(Second_LightCountdown);
 
@@ -122,5 +123,5 @@ void loop()
 		Second_CountDown_Last = Second_CountDown;
 	}
 
-	delay(500);
+	delay(100);
 }

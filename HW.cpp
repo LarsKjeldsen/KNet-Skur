@@ -12,32 +12,21 @@ long lastencoderValue = 0;
 volatile uint8_t debounce[NUM_SW];      // switch debounce buffer
 volatile uint8_t switchcount[NUM_SW];
 
-volatile bool S1_LONG;
-volatile bool S1_PRESSED;
-volatile bool S2_LONG;
-volatile bool S2_PRESSED;
-
-volatile enum Event event;
-volatile bool SecTick;
-
-volatile uint16_t Count_10ms;
-volatile uint16_t Count_Sec = 59;
-volatile int32_t Second_CountDown;
-volatile int32_t Second_LightCountdown;
-
 Ticker Ticker_10ms;
 long Timer_counter = 0;
 
 
 void HW_setup()
 {
-//	pinMode(SW1_Pin, INPUT_PULLUP);
-//	pinMode(SW2_Pin, INPUT_PULLUP);
 
 	Ticker_10ms.attach_ms(10, TimerRoutine_10ms);
 }
 
 
+int ReadTouch(uint8_t TouchPad)
+{
+    return touchRead(TouchPad);
+}
 
 void ICACHE_RAM_ATTR  TimerRoutine_10ms()
 {
@@ -86,7 +75,10 @@ void ICACHE_RAM_ATTR  TimerRoutine_10ms()
         }
 
 	MONITOR_S(1);
-	MONITOR_S(2);
+    MONITOR_S(2);
+    MONITOR_S(3);
+    MONITOR_S(4);
+    MONITOR_S(5);
 
 	if (event == EV_NONE) {
 		event = ev;

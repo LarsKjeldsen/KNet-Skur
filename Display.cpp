@@ -1,18 +1,14 @@
 #include "Display.h"
 #include "HW.h"
 
-extern volatile bool S1_LONG;
-extern volatile bool S1_PRESSED;
-extern volatile bool S2_LONG;
-extern volatile bool S2_PRESSED;
-
-LiquidCrystal_I2C lcd(0x27, 40, 4);
+LiquidCrystal_I2C lcd(0x3F, 40, 4);
 
 
 void Display_Setup()
 {
-	lcd.begin(20, 4);
-	lcd.clear();
+	lcd.init();
+	lcd.backlight();
+	lcd.setCursor(0, 0);
 	lcd.print("Starter Skur...");
 }
 
@@ -69,7 +65,7 @@ void Display_Weather(Reading * r)
 
 	lcd.setCursor(0, 3);
 //	lcd.printf("%sC %s% %s", Temparture, Humidity, Presure);
-	lcd.printf("%6fC %6f %7fPa", r->Temp, r->Humid, r->Press);
+	lcd.printf("%2.1fC %2.1f %5.0fPa", r->Temp, r->Humid, r->Press);
 }
 
 void Display_buttoms(Event e, bool s1, bool s2)

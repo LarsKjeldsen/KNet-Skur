@@ -35,7 +35,7 @@
 
 
 int32_t Second_CountDown_Last;
-Reading *reading;
+Reading* reading;
 
 #define LIGHT_DELAY_SECOND  600  // 10 min.
 
@@ -91,16 +91,31 @@ void loop()
 	if (ev == EV_S1_LONG)
 		Second_LightCountdown = 0;
 
-	/*
-	Serial.print(SW1); Serial.print(":"); Serial.print(SW2); Serial.print(":"); Serial.print(SW3); Serial.print(":"); Serial.print(SW4); Serial.print(":"); Serial.print(SW5); Serial.print("  -  ");
-	Serial.print(S1_PRESSED); Serial.print(":"); Serial.print(S2_PRESSED); Serial.print(":"); Serial.print(S3_PRESSED); Serial.print(":"); Serial.print(S4_PRESSED); Serial.print(":"); Serial.print(S5_PRESSED); Serial.print("  -  ");
-	Serial.print(S1_LONG); Serial.print(":"); Serial.print(S2_LONG); Serial.print(":"); Serial.print(S3_LONG); Serial.print(":"); Serial.print(S4_LONG); Serial.print(":"); Serial.println(S5_LONG);
-	*/
 
-	
+//	Serial.print(S1_PRESSED); Serial.print(":"); Serial.print(S2_PRESSED); Serial.print(":"); Serial.print(S3_PRESSED); Serial.print(":"); Serial.print(S4_PRESSED); Serial.print(":"); Serial.print(S5_PRESSED); Serial.print("  -  ");
+//	Serial.print(S1_LONG); Serial.print(":"); Serial.print(S2_LONG); Serial.print(":"); Serial.print(S3_LONG); Serial.print(":"); Serial.print(S4_LONG); Serial.print(":"); Serial.println(S5_LONG);
+
+	if (S1_PRESSED)
+		digitalWrite(L1, HIGH);
+	else
+		digitalWrite(L1, LOW);
+
+	if (S2_PRESSED)
+		digitalWrite(L2, HIGH);
+	else
+		digitalWrite(L2, LOW);
+
+	if (S3_PRESSED)
+
+		digitalWrite(L3, HIGH);
+	else
+		digitalWrite(L3, LOW);
+
+
+
 	if (Tick)
 	{
-		Display_buttoms(ev, TOUCH1_Pin, TOUCH2_Pin);
+		Display_buttoms(ev, TOUCH1_Pin, TOUCH2_Pin);  
 
 		ControlBacklight(Second_LightCountdown);
 
@@ -113,7 +128,7 @@ void loop()
 		Display_Solar(reading);
 		Display_Battery(reading);
 		Display_Load(reading);
-		if (! Second_CountDown)
+		if (!Second_CountDown)
 			Display_Weather(reading);
 	}
 	if (Second_CountDown_Last != Second_CountDown)

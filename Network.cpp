@@ -64,20 +64,22 @@ void WiFi_Setup()
 
 void Send_reading(Reading* r)
 {
-	SendMQTT("KNet/Haven/Skur-v2/Solar1_mA", r->Solar1_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Solar1_V", r->Solar1_V);
-	SendMQTT("KNet/Haven/Skur-v2/Solar2_mA", r->Solar2_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Solar2_V", r->Solar2_V);
-	SendMQTT("KNet/Haven/Skur-v2/Battery_mA", r->Battery_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Battery_V", r->Battery_V);
-	SendMQTT("KNet/Haven/Skur-v2/Load1_mA", r->load1_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Load2_mA", r->load2_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Load3_mA", r->load3_mA);
-	SendMQTT("KNet/Haven/Skur-v2/Load_V", r->Load_V);
+	SendMQTT("KNet/Haven/Skur_v2/Solar1_mA", r->Solar1_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Solar1_V", r->Solar1_V);
+	SendMQTT("KNet/Haven/Skur_v2/Solar2_mA", r->Solar2_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Solar2_V", r->Solar2_V);
+	SendMQTT("KNet/Haven/Skur_v2/Battery_mA", r->Battery_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Battery_V", r->Battery_V);
+	SendMQTT("KNet/Haven/Skur_v2/Charger_mA", r->Charger_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Charger_V", r->Charger_V);
+	SendMQTT("KNet/Haven/Skur_v2/Load1_mA", r->load1_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load2_mA", r->load2_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load3_mA", r->load3_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load_V", r->Load_V);
 
-	SendMQTT("KNet/Haven/Vejr-v2/Temperatur", r->Temp);
-	SendMQTT("KNet/Haven/Vejr-v2/Fugtighed", r->Humid);
-	SendMQTT("KNet/Haven/Vejr-v2/Lufttryk", r->Press);
+	SendMQTT("KNet/Haven/Vejr_v2/Temperatur", r->Temp);
+	SendMQTT("KNet/Haven/Vejr_v2/Fugtighed", r->Humid);
+	SendMQTT("KNet/Haven/Vejr_v2/Lufttryk", r->Press);
 }
 
 void MQTT_Setup()
@@ -89,7 +91,9 @@ void MQTT_Setup()
 
 	String IP = WiFi.localIP().toString();
 	MQTTclient.setServer(MQTTServer, 1883);
-	String clientId = "Skur-" + IP + "-";
+	MQTTclient.setSocketTimeout(120);
+	MQTTclient.setKeepAlive(120);
+	String clientId = "Skur_" + IP + "-";
 	clientId += String(random(0xffff), HEX);
 
 	while (!MQTTclient.connected())
@@ -116,7 +120,7 @@ void SendMQTT(char* Topic, int32_t payload)
 	char s[20];
 	itoa(payload, s, 10);
 
-	MQTTclient.publish(Topic, s, true);
+	MQTTclient.publish(Topic, s, false);
 }
 
 void SendMQTT(char* Topic, float payload)
@@ -127,6 +131,6 @@ void SendMQTT(char* Topic, float payload)
 	char s[20];
 	dtostrf(payload, 4, 1, s);
 
-	MQTTclient.publish(Topic, s, true);
+	MQTTclient.publish(Topic, s, false);
 }
 

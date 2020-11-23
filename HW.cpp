@@ -25,10 +25,6 @@ volatile uint16_t Count_Sec = 59;
 volatile int32_t Second_CountDown;
 volatile int32_t Second_LightCountdown;
 
-volatile int lastEncoded = 0;
-volatile long encoderValue = 0;
-long lastencoderValue = 0;
-
 volatile uint8_t debounce[NUM_SW];      // switch debounce buffer
 volatile uint8_t switchcount[NUM_SW];
 
@@ -40,6 +36,9 @@ void HW_setup()
 {
 
 	Ticker_10ms.attach_ms(10, TimerRoutine_10ms);
+    pinMode(L1, OUTPUT);
+    pinMode(L2, OUTPUT);
+    pinMode(L3, OUTPUT);
 }
 
 

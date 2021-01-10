@@ -3,6 +3,12 @@
 #define _HW_h
 #include "Arduino.h"
 
+extern int32_t Second_CountDown;
+extern int32_t Second_LightCountdown;
+extern unsigned long ESP_Sleep_Timeout;
+
+extern int Count_Sec;
+
 // HW
 #define TOUCH1_Pin 14
 #define TOUCH2_Pin 12
@@ -24,54 +30,14 @@
 
 #define TOUCH_TRESHOLD 25
 
-#define SW1     (ReadTouch(TOUCH1_Pin) > TOUCH_TRESHOLD)
-#define SW2     (ReadTouch(TOUCH2_Pin) > TOUCH_TRESHOLD)
-#define SW3     (ReadTouch(TOUCH3_Pin) > TOUCH_TRESHOLD)
-#define SW4     (ReadTouch(TOUCH4_Pin) > TOUCH_TRESHOLD)
-#define SW5     (ReadTouch(TOUCH5_Pin) > TOUCH_TRESHOLD)
-// Define how long a LONG press is (# x 20ms)
-#define SW_CNTMAX 80
-
-
-#define NUM_SW	5
-
-enum Event {
-	EV_NONE,
-	EV_S1_SHORT,
-	EV_S1_LONG,
-	EV_S2_SHORT,
-	EV_S2_LONG,
-	EV_S3_SHORT,
-	EV_S3_LONG,
-	EV_S4_SHORT,
-	EV_S4_LONG,
-	EV_S5_SHORT,
-	EV_S5_LONG,
-	EV_TIMEOUT,
-};
-
-extern volatile bool S1_LONG;
-extern volatile bool S1_PRESSED;
-extern volatile bool S2_LONG;
-extern volatile bool S2_PRESSED;
-extern volatile bool S3_LONG;
-extern volatile bool S3_PRESSED;
-extern volatile bool S4_LONG;
-extern volatile bool S4_PRESSED;
-extern volatile bool S5_LONG;
-extern volatile bool S5_PRESSED;
-
-
-extern volatile enum Event event;
-extern volatile bool SecTick;
-
-extern volatile uint16_t Count_10ms;
-extern volatile uint16_t Count_Sec;
-extern volatile int32_t Second_CountDown;
-extern volatile int32_t Second_LightCountdown;
+#define SW1     (touchRead(TOUCH1_Pin) < TOUCH_TRESHOLD)
+#define SW2     (touchRead(TOUCH2_Pin) < TOUCH_TRESHOLD)
+#define SW3     (touchRead(TOUCH3_Pin) < TOUCH_TRESHOLD)
+#define SW4     (touchRead(TOUCH4_Pin) < TOUCH_TRESHOLD)
+#define SW5     (touchRead(TOUCH5_Pin) < TOUCH_TRESHOLD)
 
 
 void HW_setup();
-void ICACHE_RAM_ATTR TimerRoutine_10ms();
+void ICACHE_RAM_ATTR TouchCallback();
 int ReadTouch(uint8_t TouchPad);
 #endif

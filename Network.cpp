@@ -19,19 +19,19 @@ PubSubClient MQTTclient(ethClient);
 
 void WiFi_Setup()
 {
+	Serial.println("WIFI Setup");
+
 	int i = 0;
 	WiFi.mode(WIFI_STA);
 
 	WiFi.config(ip, gw, mask);
 	WiFi.begin(ssid, password);
-
 	while (WiFi.status() != WL_CONNECTED) {
-		delay(1000);
+		delay(100);
 		Serial.print(".");
-		if (i++ >= 10)
+		if (i++ >= 50)
 			ESP.restart();
 	}
-
 
 	ArduinoOTA.setHostname("KNetSkurV2");
 
@@ -62,6 +62,18 @@ void WiFi_Setup()
 	Serial.println(WiFi.localIP());
 }
 
+
+
+
+void WIFI_disconnect()
+{
+	Serial.println("WIFI disconnect");
+
+//	MQTTclient.disconnect();
+	//	WiFi.disconnect(true); delay(1); // disable WIFI altogether
+//	WiFi.mode(WIFI_OFF);
+}
+
 void Send_reading(Reading* r)
 {
 	SendMQTT("KNet/Haven/Skur_v2/Solar1_mA", r->Solar1_mA);
@@ -80,21 +92,27 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Vejr_v2/Temperatur", r->Temp);
 	SendMQTT("KNet/Haven/Vejr_v2/Fugtighed", r->Humid);
 	SendMQTT("KNet/Haven/Vejr_v2/Lufttryk", r->Press);
+
+	WIFI_disconnect();
 }
 
 void MQTT_Setup()
 {
 	int c = 0;
 
+	Serial.println("MQTT_Setup");
+
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
 
 	String IP = WiFi.localIP().toString();
+
 	MQTTclient.setServer(MQTTServer, 1883);
 	MQTTclient.setSocketTimeout(120);
 	MQTTclient.setKeepAlive(120);
-	String clientId = "Skur_" + IP + "-";
-	clientId += String(random(0xffff), HEX);
+	String clientId = "Skur_V2" + IP;
+
+	MQTTclient.connect(clientId.c_str());
 
 	while (!MQTTclient.connected())
 	{
@@ -102,7 +120,7 @@ void MQTT_Setup()
 		// Attempt to connect
 		MQTTclient.connect(clientId.c_str());
 
-		delay(1000);
+		delay(100);
 		Serial.println("ERROR");
 		if (c++ >= 10) {
 			Serial.println("Unable to connect to MQTT, ESP is restarting.");

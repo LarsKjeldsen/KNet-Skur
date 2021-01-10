@@ -1,4 +1,5 @@
 #include "Display.h"
+#include "HW.h"
 
 LiquidCrystal_I2C lcd(0x3F, 40, 4);
 
@@ -7,7 +8,7 @@ void Display_Setup()
 {
 	lcd.init();
 	lcd.backlight();
-	lcd.setCursor(0, 0);
+	lcd.setCursor(0, 3);
 	lcd.print("Starter Skur...");
 }
 
@@ -20,6 +21,13 @@ void Display_Text(char * text, int line)
 void Display_Clear()
 {
 	lcd.clear();
+}
+
+
+void Display_Status()
+{
+	lcd.setCursor(0, 3);
+	lcd.printf("%lu mS   ", ESP_Sleep_Timeout - millis());
 }
 
 void Display_Solar(Reading * r)
@@ -55,6 +63,12 @@ void Display_Countdown(int32_t Second_CountDown)
 
 }
 
+void Display_sleeping()
+{
+	lcd.setCursor(0, 3);
+	lcd.printf("Sleeping, %lu mS   ", ESP_Sleep_Timeout - millis());
+}
+
 void Display_Weather(Reading * r)
 {
 //	char Temparture[10], Humidity[10], Presure[10];
@@ -67,27 +81,12 @@ void Display_Weather(Reading * r)
 	lcd.printf("%2.1fC %2.1f %5.0fPa", r->Temp, r->Humid, r->Press);
 }
 
-void Display_buttoms(Event e, bool s1, bool s2)
+
+void ControlBacklight(bool backlight)
 {
-	lcd.setCursor(16, 2);
-//	if (S1_LONG)    lcd.print('L'); else lcd.print(' ');
-	if (S1_PRESSED) lcd.print('S'); else lcd.print(' ');
-	if (S2_LONG)    lcd.print('L'); else lcd.print(' ');
-	if (S2_PRESSED) lcd.print('S'); else lcd.print(' ');
+	if (backlight)
+		lcd.backlight();
+	else
+		lcd.noBacklight();
 }
 
-void ControlBacklight(int32_t count)
-{
-	if (S2_PRESSED) {
-		lcd.backlight();
-		return;
-	}
-	if (count == 0)
-		lcd.noBacklight();
-	else
-	{
-		lcd.backlight();
-		lcd.setCursor(16, 2);
-		lcd.printf("%d:%02d", count / 60, count % 60);
-	}
-}

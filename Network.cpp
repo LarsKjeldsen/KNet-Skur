@@ -69,9 +69,8 @@ void WIFI_disconnect()
 {
 	Serial.println("WIFI disconnect");
 
-//	MQTTclient.disconnect();
-	//	WiFi.disconnect(true); delay(1); // disable WIFI altogether
-//	WiFi.mode(WIFI_OFF);
+	MQTTclient.disconnect();
+	WiFi.mode(WIFI_OFF);
 }
 
 void Send_reading(Reading* r)

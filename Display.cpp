@@ -27,7 +27,7 @@ void Display_Clear()
 void Display_Status()
 {
 	lcd.setCursor(0, 3);
-	lcd.printf("%lu mS   ", ESP_Sleep_Timeout - millis());
+	lcd.printf("%lu Sek           ", (ESP_Sleep_Timeout - millis()) / 1000);
 }
 
 void Display_Solar(Reading * r)
@@ -66,8 +66,10 @@ void Display_Countdown(int32_t Second_CountDown)
 void Display_sleeping()
 {
 	lcd.setCursor(0, 3);
-	lcd.printf("Sleeping, %lu mS   ", ESP_Sleep_Timeout - millis());
+	lcd.print("Sleeping       ");
 }
+
+
 
 void Display_Weather(Reading * r)
 {

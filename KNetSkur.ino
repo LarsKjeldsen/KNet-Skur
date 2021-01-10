@@ -147,12 +147,21 @@ bool Check_buttoms()
 {
 	if (SW1)
 	{
-		Serial.println("Touch wakeup");
+		Serial.println("SW1 pressed, wakeup for 60 sek");
 		ESP_Sleep_Timeout = millis() + (WAKE_TIME * 1000ul);
 		ControlBacklight(true);
 		return true;
 	}
-	else
+	else if (SW5)
+	{
+		Serial.println("SW5 Pressed, go back to sleep now");
+		ESP_Sleep_Timeout = millis();
+		ControlBacklight(false);
+		return true;
+
+
+	}
+
 		return false;
 }
 

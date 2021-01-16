@@ -40,7 +40,7 @@ private:
 	Adafruit_INA219 Solar1  {0x40};
 	Adafruit_INA219 Solar2  {0x41};
 	Adafruit_INA219 Charger {0x44};
-	Adafruit_INA219 Batt    {0x45};
+//	Adafruit_INA219 Batt    {0x45};
 
 	INA3221 ina3221;
 

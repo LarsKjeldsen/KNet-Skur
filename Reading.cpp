@@ -16,14 +16,14 @@ Reading::Reading()
 	Solar1.begin(&Wire1);
 	Solar2.begin(&Wire1);
 	Charger.begin(&Wire1);
-	Batt.begin(&Wire1);
+//	Batt.begin(&Wire1);
 
 	ina3221.begin(SDA_INA33221, SCL_INA33221);
 
 	Solar1.setCalibration_32V_2A();
 	Solar2.setCalibration_32V_2A();
 	Charger.setCalibration_32V_2A();
-	Batt.setCalibration_32V_2A();
+//	Batt.setCalibration_32V_2A();
 
 	Serial.println("Starting BME");
 	while ((!bme.begin(0x76)) && (c < 1)) {
@@ -53,15 +53,17 @@ void Reading::Get_power()
 	Solar1_mA = Solar1.getCurrent_mA();
 	Solar2_V = Solar2.getBusVoltage_V();
 	Solar2_mA = Solar2.getCurrent_mA();
-	Battery_V = Batt.getBusVoltage_V();
-	Battery_mA = -Batt.getCurrent_mA();
+//	Battery_V = Batt.getBusVoltage_V();
+//	Battery_mA = -Batt.getCurrent_mA();
 	Charger_V = Charger.getBusVoltage_V();
 	Charger_mA = Charger.getCurrent_mA();
 
-	load3_mA = ina3221.getCurrent_mA(1);
-	load2_mA = ina3221.getCurrent_mA(2);
-	load1_mA = ina3221.getCurrent_mA(3);
-	Load_V = ina3221.getBusVoltage_V(1);
+	Battery_mA =  ina3221.getCurrent_mA(3);
+	load2_mA =    ina3221.getCurrent_mA(2);
+	load1_mA =    ina3221.getCurrent_mA(1);
+	load1_mA = 0;
+	Load_V =      ina3221.getBusVoltage_V(1);
+	Battery_V = Load_V;
 /*
 	Serial.print("Solar1      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
 	Serial.print("Solar2      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);

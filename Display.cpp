@@ -27,7 +27,7 @@ void Display_Clear()
 void Display_Status()
 {
 	lcd.setCursor(0, 3);
-	lcd.printf("%lu Sek           ", (ESP_Sleep_Timeout - millis()) / 1000);
+	lcd.printf("%lu Sek         ", (ESP_Sleep_Timeout - millis()) / 1000);
 }
 
 void Display_Solar(Reading * r)
@@ -46,7 +46,7 @@ void Display_Battery(Reading * r)
 void Display_Load(Reading * r)
 {
 	lcd.setCursor(0, 2);
-	lcd.printf("Load  %4dmA", r->load1_mA);
+	lcd.printf("Load  %4d / %d mA", r->load1_mA, r->load2_mA);
 }
 
 

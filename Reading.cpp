@@ -4,6 +4,7 @@
 
 #include "Reading.h"
 #include "Display.h"
+#include "HW.h"
 
 
 
@@ -11,18 +12,21 @@
 Reading::Reading()
 {
 	int c = 0;
-	Load.begin();
-	Solar1.begin();
-	Solar2.begin();
-	Batt.begin();
 
-	Load.setCalibration_32V_2A();
-	Solar1.setCalibration_32V_1A();
-	Solar2.setCalibration_32V_1A();
-	Batt.setCalibration_32V_2A();
+	Solar1.begin(&Wire1);
+	Solar2.begin(&Wire1);
+	Charger.begin(&Wire1);
+//	Batt.begin(&Wire1);
+
+	ina3221.begin(SDA_INA33221, SCL_INA33221);
+
+	Solar1.setCalibration_32V_2A();
+	Solar2.setCalibration_32V_2A();
+	Charger.setCalibration_32V_2A();
+//	Batt.setCalibration_32V_2A();
 
 	Serial.println("Starting BME");
-	while ((!bme.begin(0x76)) && (c < 10)) {
+	while ((!bme.begin(0x76)) && (c < 1)) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
 		c++;
@@ -40,23 +44,35 @@ Reading::Reading()
 		Adafruit_BME280::FILTER_X4,
 		Adafruit_BME280::STANDBY_MS_62_5);
 
-//		Adafruit_BME280::StandbyTime_50ms,
-//		Adafruit_BME280::SpiEnable_False,
-//		0x76 // I2C address. I2C specific.
-
 	Serial.println("Completed Startup");
 }
 
 void Reading::Get_power()
 {
-	load_V = Load.getBusVoltage_V();
-	load_mA = Load.getCurrent_mA();
 	Solar1_V = Solar1.getBusVoltage_V();
 	Solar1_mA = Solar1.getCurrent_mA();
 	Solar2_V = Solar2.getBusVoltage_V();
 	Solar2_mA = Solar2.getCurrent_mA();
-	Battery_V = Batt.getBusVoltage_V();
-	Battery_mA = Batt.getCurrent_mA();
+//	Battery_V = Batt.getBusVoltage_V();
+//	Battery_mA = -Batt.getCurrent_mA();
+	Charger_V = Charger.getBusVoltage_V();
+	Charger_mA = Charger.getCurrent_mA();
+
+	Battery_mA =  ina3221.getCurrent_mA(3);
+	load2_mA =    ina3221.getCurrent_mA(2);
+	load1_mA =    ina3221.getCurrent_mA(1);
+	load1_mA = 0;
+	Load_V =      ina3221.getBusVoltage_V(1);
+	Battery_V = Load_V;
+/*
+	Serial.print("Solar1      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
+	Serial.print("Solar2      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);
+	Serial.print("Battery     = "); Serial.print(Battery_mA); Serial.print(" / "); Serial.println(Battery_V);
+	Serial.print("Charger     = "); Serial.print(Charger_mA); Serial.print(" / "); Serial.println(Charger_V);
+	Serial.print("L1_mA1   = "); Serial.print(load1_mA);  Serial.print(" / "); Serial.println(Load_V);
+	Serial.print("L2_mA2   = "); Serial.print(load2_mA);  Serial.print(" / "); Serial.println(Load_V);
+	Serial.print("L3_mA3   = "); Serial.print(load3_mA);  Serial.print(" / "); Serial.println(Load_V);
+*/
 }
 
 

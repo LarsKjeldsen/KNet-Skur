@@ -1,31 +1,33 @@
 #include "Display.h"
 #include "HW.h"
 
-extern volatile bool S1_LONG;
-extern volatile bool S1_PRESSED;
-extern volatile bool S2_LONG;
-extern volatile bool S2_PRESSED;
-
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
+LiquidCrystal_I2C lcd(0x3F, 40, 4);
 
 
 void Display_Setup()
 {
-	lcd.begin(20, 4);
-	lcd.clear();
-	lcd.on();
-	lcd.write("Starter Skur...");
+	lcd.init();
+	lcd.backlight();
+	lcd.setCursor(0, 3);
+	lcd.print("Starter Skur...");
 }
 
 void Display_Text(char * text, int line)
 {
 	lcd.setCursor(0, line);
-	lcd.write(text);
+	lcd.print(text);
 }
 
 void Display_Clear()
 {
 	lcd.clear();
+}
+
+
+void Display_Status()
+{
+	lcd.setCursor(0, 3);
+	lcd.printf("%lu Sek         ", (ESP_Sleep_Timeout - millis()) / 1000);
 }
 
 void Display_Solar(Reading * r)
@@ -44,7 +46,7 @@ void Display_Battery(Reading * r)
 void Display_Load(Reading * r)
 {
 	lcd.setCursor(0, 2);
-	lcd.printf("Load  %4dmA", r->load_mA);
+	lcd.printf("Load  %4d / %d mA", r->load1_mA, r->load2_mA);
 }
 
 
@@ -61,34 +63,32 @@ void Display_Countdown(int32_t Second_CountDown)
 
 }
 
-void Display_Weather(Reading * r)
+void Display_sleeping()
 {
 	lcd.setCursor(0, 3);
-	//	lcd.printf("%2d.%01dC %2d.%01d%% %4d.%01dPa", r->Temp / 100, abs(r->Temp % 10), r->Humid / 100, r->Humid % 10, r->Press / 100, r->Press % 10);
-	//	lcd.printf("%6fC %6f %7fPa", r->Temp, r->Humid, r->Press);
+	lcd.print("Sleeping       ");
 }
 
-void Display_buttoms(Event e, bool s1, bool s2)
+
+
+void Display_Weather(Reading * r)
 {
-	lcd.setCursor(16, 2);
-	if (S1_LONG)    lcd.print('L'); else lcd.print(' ');
-	if (S1_PRESSED) lcd.print('S'); else lcd.print(' ');
-	if (S2_LONG)    lcd.print('L'); else lcd.print(' ');
-	if (S2_PRESSED) lcd.print('S'); else lcd.print(' ');
+//	char Temparture[10], Humidity[10], Presure[10];
+//	dtostrf(r->Temp, 4, 6, Temparture);
+//	dtostrf(r->Humid, 4, 6, Humidity);
+//	dtostrf(r->Press, 4, 6, Presure);
+
+	lcd.setCursor(0, 3);
+//	lcd.printf("%sC %s% %s", Temparture, Humidity, Presure);
+	lcd.printf("%2.1fC %2.1f %5.0fPa", r->Temp, r->Humid, r->Press);
 }
 
-void ControlBacklight(int32_t count)
+
+void ControlBacklight(bool backlight)
 {
-	if (S2_PRESSED) {
+	if (backlight)
 		lcd.backlight();
-		return;
-	}
-	if (count == 0)
-		lcd.noBacklight();
 	else
-	{
-		lcd.backlight();
-		lcd.setCursor(16, 2);
-		lcd.printf("%d:%02d", count / 60, count % 60);
-	}
+		lcd.noBacklight();
 }
+

@@ -36,8 +36,8 @@
     <ClInclude Include="__vm\.KNet-Skur.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="INA3221.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="__vm\.KNetSkur.vsarduino.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

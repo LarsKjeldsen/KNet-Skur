@@ -203,7 +203,7 @@ void Check_buttoms()
 
 	if (SW1 && SW5)
 	{
-		Display_Setup(); // In case is has gone down.
+		ESP.restart();
 	}
 
 	if (SW2)

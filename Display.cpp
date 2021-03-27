@@ -7,9 +7,6 @@ LiquidCrystal_I2C lcd(0x3F, 40, 4);
 void Display_Setup()
 {
 	lcd.init();
-	lcd.backlight();
-	lcd.setCursor(0, 3);
-	lcd.print("Starter Skur...");
 }
 
 void Display_Text(char * text, int line)
@@ -27,7 +24,7 @@ void Display_Clear()
 void Display_Status()
 {
 	lcd.setCursor(0, 3);
-	lcd.printf("%lu Sek         ", (ESP_Sleep_Timeout - millis()) / 1000);
+	lcd.printf("%3lu, %3lu", SleepCountDownSec, LightCountDownSec);
 }
 
 void Display_Solar(Reading * r)
@@ -40,33 +37,20 @@ void Display_Battery(Reading * r)
 {
 	char s[20];
 	lcd.setCursor(0, 1);
-	lcd.printf("Bat  %5dmA  %sV", r->Battery_mA, dtostrf(r->Battery_V, 5, 2, s));
+	lcd.printf("Bat  %5dmA  %sV", r->Charger_mA, dtostrf(r->Battery_V, 5, 2, s));
 }
 
 void Display_Load(Reading * r)
 {
 	lcd.setCursor(0, 2);
-	lcd.printf("Load  %4d / %d mA", r->load1_mA, r->load2_mA);
+	lcd.printf("L %3d %3d %3d, %3d", r->Load1_mA, r->Load2_mA, r->Load3_mA, r->Load4_mA);
 }
 
-
-void Display_Countdown(int32_t Second_CountDown)
-{
-	lcd.setCursor(0, 3);
-	lcd.printf("%02d:%02d:%02d    Inv: ", (Second_CountDown / 3600) % 24, (Second_CountDown / 60) % 60, Second_CountDown % 60);
-	if (Second_CountDown == 0) {
-		lcd.print("OFF");
-	}
-	else {
-		lcd.print("ON ");
-	}
-
-}
 
 void Display_sleeping()
 {
 	lcd.setCursor(0, 3);
-	lcd.print("Sleeping       ");
+	lcd.print("Sleeping          ");
 }
 
 

@@ -19,16 +19,17 @@ public:
 	int16_t Solar1_mA;
 	int16_t Solar2_mA;
 	float   Battery_V;
-	int16_t Battery_mA;
 	float   Charger_V;
 	int16_t Charger_mA;
 	float   Load_V;
-	int16_t load1_mA;
-	int16_t load2_mA;
-	int16_t load3_mA;
+	int16_t Load1_mA;
+	int16_t Load2_mA;
+	int16_t Load3_mA;
+	int16_t Load4_mA;
 
 	void Get_weather();
 	void Get_power();
+	uint16_t Get_Load4_mA();
 
 	float Temp;
 	float Humid;

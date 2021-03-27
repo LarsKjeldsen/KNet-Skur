@@ -6,13 +6,13 @@
 char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
 
-IPAddress ip(192, 168, 1, 216);
+IPAddress ip(192, 168, 1, 217);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 
 WiFiClient ethClient;
 
-IPAddress MQTTServer(192, 168, 1, 20);
+IPAddress MQTTServer(192, 168, 1, 21);
 PubSubClient MQTTclient(ethClient);
 
 
@@ -70,6 +70,14 @@ void WIFI_disconnect()
 	Serial.println("WIFI disconnect");
 
 	MQTTclient.disconnect();
+
+	while (MQTTclient.state() != -1) {
+		delay(10);
+		MQTTclient.loop();
+	}
+	
+	delay(10);
+
 	WiFi.mode(WIFI_OFF);
 }
 
@@ -79,13 +87,14 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Skur_v2/Solar1_V", r->Solar1_V);
 	SendMQTT("KNet/Haven/Skur_v2/Solar2_mA", r->Solar2_mA);
 	SendMQTT("KNet/Haven/Skur_v2/Solar2_V", r->Solar2_V);
-	SendMQTT("KNet/Haven/Skur_v2/Battery_mA", r->Battery_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Battery_mA", r->Load1_mA);
 	SendMQTT("KNet/Haven/Skur_v2/Battery_V", r->Battery_V);
 	SendMQTT("KNet/Haven/Skur_v2/Charger_mA", r->Charger_mA);
 	SendMQTT("KNet/Haven/Skur_v2/Charger_V", r->Charger_V);
-	SendMQTT("KNet/Haven/Skur_v2/Load1_mA", r->load1_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load2_mA", r->load2_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load3_mA", r->load3_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load1_mA", r->Load1_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load2_mA", r->Load2_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load3_mA", r->Load3_mA);
+	SendMQTT("KNet/Haven/Skur_v2/Load4_mA", r->Load4_mA);
 	SendMQTT("KNet/Haven/Skur_v2/Load_V", r->Load_V);
 
 	SendMQTT("KNet/Haven/Vejr_v2/Temperatur", r->Temp);

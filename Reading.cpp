@@ -29,7 +29,7 @@ Reading::Reading()
 	while ((!bme.begin(0x76)) && (c < 1)) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
-		c++;
+		c++;                              
 	}
 	if (c < 10)
 		Serial.println("BME280 sensor OK !");
@@ -53,17 +53,17 @@ void Reading::Get_power()
 	Solar1_mA = Solar1.getCurrent_mA();
 	Solar2_V = Solar2.getBusVoltage_V();
 	Solar2_mA = Solar2.getCurrent_mA();
-//	Battery_V = Batt.getBusVoltage_V();
-//	Battery_mA = -Batt.getCurrent_mA();
 	Charger_V = Charger.getBusVoltage_V();
 	Charger_mA = Charger.getCurrent_mA();
 
-	Battery_mA =  ina3221.getCurrent_mA(3);
-	load2_mA =    ina3221.getCurrent_mA(2);
-	load1_mA =    ina3221.getCurrent_mA(1);
-	load1_mA = 0;
-	Load_V =      ina3221.getBusVoltage_V(1);
-	Battery_V = Load_V;
+	Load1_mA = ina3221.getCurrent_mA(1);
+	Load2_mA = ina3221.getCurrent_mA(2);
+	Load3_mA = ina3221.getCurrent_mA(3);
+
+	Load4_mA = Get_Load4_mA();
+	Serial.println(Load4_mA);
+
+	Battery_V = ina3221.getBusVoltage_V(1);
 /*
 	Serial.print("Solar1      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
 	Serial.print("Solar2      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);
@@ -71,7 +71,6 @@ void Reading::Get_power()
 	Serial.print("Charger     = "); Serial.print(Charger_mA); Serial.print(" / "); Serial.println(Charger_V);
 	Serial.print("L1_mA1   = "); Serial.print(load1_mA);  Serial.print(" / "); Serial.println(Load_V);
 	Serial.print("L2_mA2   = "); Serial.print(load2_mA);  Serial.print(" / "); Serial.println(Load_V);
-	Serial.print("L3_mA3   = "); Serial.print(load3_mA);  Serial.print(" / "); Serial.println(Load_V);
 */
 }
 
@@ -84,3 +83,24 @@ void Reading::Get_weather()
 	Humid = bme.readHumidity();
 }
 
+extern uint16_t millivolt[];
+static int p = 0;
+
+uint16_t Reading::Get_Load4_mA()
+{
+	int32_t r = 0;
+
+	millivolt[p] = analogRead(SENCE);
+	if (p++ >= SENCE_READINGS - 1)
+		p = 0;
+
+	for (int i = 0; i < SENCE_READINGS; i++)
+		r += millivolt[i];
+
+	r = (r / SENCE_READINGS) - 260;
+
+	if (r < 0)
+		r = 0;
+
+	return r * 15;
+}

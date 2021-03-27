@@ -35,11 +35,13 @@
 
 Reading* reading;
 
-#define WAKE_TIME 60 // 1 minute
+#define WAKE_TIME 600 // 10 minute
 #define READING_INTERVAL 60
-#define LIGHT_DELAY_SECOND  600  // 10 min.
+#define LIGHT_DELAY_SECOND 600  // 10 min.
+#define MAX_RYOBI_CHARGE_TIME 300
 
 int Next_reading = 0;
+int millisec = 0;
 
 void setup()
 {
@@ -69,9 +71,10 @@ void setup()
 
 	ControlBacklight(0); // turn off backlight
 
-	ESP_Sleep_Timeout = millis() + (10 * 1000ul);  // Start with 1 min
-	ControlBacklight(true);
+	SleepCountDownSec =60;  // Start with 1 min
+	LightCountDownSec = 5;  // Start with 1 min
 
+	ControlBacklight(true);
 
 	// Setup interrupt on Touch Pad 3 (GPIO15)
 	touchAttachInterrupt(TOUCH1_Pin, TouchCallback, TOUCH_TRESHOLD);
@@ -82,6 +85,12 @@ void setup()
 
 	//Configure Touchpad as wakeup source
 	esp_sleep_enable_touchpad_wakeup();
+
+//	gpio_hold_en(L1);
+//	gpio_hold_en(L2);
+//	gpio_hold_en(L3);
+//	gpio_hold_en(RELAY);
+//	gpio_deep_sleep_hold_en();
 }
 
 
@@ -89,36 +98,75 @@ void loop()
 {
 	ArduinoOTA.handle();
 
+	unsigned long m = millis();
 	Get_reading();
 	Update_display();
 	Update_timers();
 
-	CheckToSendReading();
+	if (millisec < m)
+	{
+//		Serial.printf("%d - %d - %d\n", LightCountDownSec, ReadingCountDownSec, RyobiChargeCountDownSec);
+		do
+		{
+			millisec += 1000;
+			Sec_Tick();
+		}
+		while (millisec < m);
+	}
 
-	if (ESP_Sleep_Timeout < millis())
+	if (ReadingCountDownSec <= 0)
+	{
+		ReadingCountDownSec = READING_INTERVAL;
+		Send_reading(reading);
+	}
+
+	if (LightCountDownSec <= 0)
+	{
+		LIGHT1_OFF;
+	}
+
+	if (Load4ChargeCountDownSec > 0)
+		RELAY_ON;
+	else
+		RELAY_OFF;
+
+	if (SleepCountDownSec <= 0 && LightCountDownSec <= 0)   // Only sleep if lights off
 	{
 		ControlBacklight(false);
 		Display_sleeping();
+		rtc_gpio_hold_en(L1);
+		rtc_gpio_hold_en(L2);
+		rtc_gpio_hold_en(L3);
+		rtc_gpio_hold_en(RELAY);
+		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		esp_light_sleep_start();
+		gpio_hold_dis(L1);
+		gpio_hold_dis(L2);
+		gpio_hold_dis(L3);
+		gpio_hold_dis(RELAY);
 		wakeup_reason();
 	}
 	
 	Check_buttoms();
-
-	if (false)
-		digitalWrite(L2, LOW);
 }
 
 
-void CheckToSendReading()
+void Sec_Tick()
 {
-	if (Count_Sec > Next_reading) // Every min
-	{
-		Next_reading = Count_Sec + READING_INTERVAL;
-		Send_reading(reading);
-	}
+	if (LightCountDownSec > 0)
+		LightCountDownSec--;
+
+	if (SleepCountDownSec > 0)
+		SleepCountDownSec--;
+
+	if (ReadingCountDownSec > 0)
+		ReadingCountDownSec--;
+
+	if (Load4ChargeCountDownSec > 0)
+		Load4ChargeCountDownSec--;
 }
+
 
 
 void Update_timers()
@@ -143,26 +191,42 @@ void Update_display()
 	Display_Status();
 }
 
-bool Check_buttoms()
+void Check_buttoms()
 {
+	unsigned long m = millis();
+
 	if (SW1)
 	{
-		Serial.println("SW1 pressed, wakeup for 60 sek");
-		ESP_Sleep_Timeout = millis() + (WAKE_TIME * 1000ul);
+		SleepCountDownSec = WAKE_TIME;
 		ControlBacklight(true);
-		return true;
 	}
-	else if (SW5)
+
+	if (SW1 && SW5)
 	{
-		Serial.println("SW5 Pressed, go back to sleep now");
-		ESP_Sleep_Timeout = millis();
-		ControlBacklight(false);
-		return true;
-
-
+		Display_Setup(); // In case is has gone down.
 	}
 
-		return false;
+	if (SW2)
+	{
+		LightCountDownSec = LIGHT_DELAY_SECOND;
+		ControlBacklight(true);
+		LIGHT1_ON;
+	}
+	if (SW3)
+	{
+		Load4ChargeCountDownSec = MAX_RYOBI_CHARGE_TIME;
+		SleepCountDownSec = MAX_RYOBI_CHARGE_TIME;
+		ControlBacklight(true);
+	}
+
+
+	if (SW5)
+	{
+		SleepCountDownSec = 0;
+		Load4ChargeCountDownSec = 0;
+		LightCountDownSec = 3; // Delay 10 to turn off light
+		ControlBacklight(false);
+	}
 }
 
 
@@ -185,3 +249,4 @@ esp_sleep_wakeup_cause_t wakeup_reason()
 #endif
 	return wakeup_reason;
 }
+

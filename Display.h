@@ -21,5 +21,7 @@ void ControlBacklight(bool);
 void Display_Text(char*, int);
 void Display_Clear();
 void Display_Status();
+void Display_load_mA(int);
+
 #endif
 

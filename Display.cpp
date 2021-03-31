@@ -21,12 +21,6 @@ void Display_Clear()
 }
 
 
-void Display_Status()
-{
-	lcd.setCursor(0, 3);
-	lcd.printf("%3lu, %3lu", SleepCountDownSec, LightCountDownSec);
-}
-
 void Display_Solar(Reading * r)
 {
 	lcd.setCursor(0, 0);
@@ -43,16 +37,22 @@ void Display_Battery(Reading * r)
 void Display_Load(Reading * r)
 {
 	lcd.setCursor(0, 2);
-	lcd.printf("L %3d %3d %3d, %3d", r->Load1_mA, r->Load2_mA, r->Load3_mA, r->Load4_mA);
+	lcd.printf("L %3d %3d %3d %3d", r->Load1_mA, r->Load2_mA, r->Load3_mA, r->Load4_mA);
 }
 
 
 void Display_sleeping()
 {
 	lcd.setCursor(0, 3);
-	lcd.print("Sleeping          ");
+	lcd.print("Sleeping            ");
 }
 
+
+void Display_Status()
+{
+	lcd.setCursor(0, 3);
+	lcd.printf("%3lu, %3lu            ", SleepCountDownSec, LightCountDownSec);
+}
 
 
 void Display_Weather(Reading * r)
@@ -63,8 +63,7 @@ void Display_Weather(Reading * r)
 //	dtostrf(r->Press, 4, 6, Presure);
 
 	lcd.setCursor(0, 3);
-//	lcd.printf("%sC %s% %s", Temparture, Humidity, Presure);
-	lcd.printf("%2.1fC %2.1f %5.0fPa", r->Temp, r->Humid, r->Press);
+	lcd.printf("%2.1fC %2.0f%% %5.0fPa  ", r->Temp, r->Humid, r->Press);
 }
 
 

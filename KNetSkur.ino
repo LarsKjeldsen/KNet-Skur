@@ -1,3 +1,6 @@
+#include <WiFiClientSecure.h>
+#include <ssl_client.h>
+#include <HTTPClient.h>
 #include <ESPmDNS.h>
 #include <Update.h>
 #include <HttpsOTAUpdate.h>
@@ -36,12 +39,14 @@
 Reading* reading;
 
 #define WAKE_TIME 600 // 10 minute
-#define READING_INTERVAL 60
+#define SEND_READING_INTERVAL 60
 #define LIGHT_DELAY_SECOND 600  // 10 min.
-#define MAX_RYOBI_CHARGE_TIME 300
+#define MAX_LOAD4_CHARGE_TIME 3600  // One hour
 
 int Next_reading = 0;
 int millisec = 0;
+
+RTC_NOINIT_ATTR bool Maintanance_mode;
 
 void setup()
 {
@@ -53,6 +58,7 @@ void setup()
 	Display_Setup();
 	Display_Text("Starter BME ", 3);
 	HW_setup();
+
 	Display_Text("Starter WiFi", 3);
 	WiFi_Setup();
 	Display_Text("Starter MQTT", 3);
@@ -85,12 +91,6 @@ void setup()
 
 	//Configure Touchpad as wakeup source
 	esp_sleep_enable_touchpad_wakeup();
-
-//	gpio_hold_en(L1);
-//	gpio_hold_en(L2);
-//	gpio_hold_en(L3);
-//	gpio_hold_en(RELAY);
-//	gpio_deep_sleep_hold_en();
 }
 
 
@@ -105,9 +105,7 @@ void loop()
 
 	if (millisec < m)
 	{
-//		Serial.printf("%d - %d - %d\n", LightCountDownSec, ReadingCountDownSec, RyobiChargeCountDownSec);
-		do
-		{
+		do	{  // Make sure we don't skip a sec.
 			millisec += 1000;
 			Sec_Tick();
 		}
@@ -116,7 +114,7 @@ void loop()
 
 	if (ReadingCountDownSec <= 0)
 	{
-		ReadingCountDownSec = READING_INTERVAL;
+		ReadingCountDownSec = SEND_READING_INTERVAL;
 		Send_reading(reading);
 	}
 
@@ -125,26 +123,18 @@ void loop()
 		LIGHT1_OFF;
 	}
 
-	if (Load4ChargeCountDownSec > 0)
-		RELAY_ON;
-	else
+	if (Load4ChargeCountDownSec <= 0)
 		RELAY_OFF;
 
-	if (SleepCountDownSec <= 0 && LightCountDownSec <= 0)   // Only sleep if lights off
+	if (!Maintanance_mode && SleepCountDownSec <= 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0)   // Only sleep if lights off
 	{
 		ControlBacklight(false);
 		Display_sleeping();
-		rtc_gpio_hold_en(L1);
-		rtc_gpio_hold_en(L2);
-		rtc_gpio_hold_en(L3);
-		rtc_gpio_hold_en(RELAY);
+		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		esp_light_sleep_start();
-		gpio_hold_dis(L1);
-		gpio_hold_dis(L2);
-		gpio_hold_dis(L3);
-		gpio_hold_dis(RELAY);
+		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 		wakeup_reason();
 	}
 	
@@ -183,18 +173,19 @@ void Get_reading()
 
 void Update_display()
 {
-
 	Display_Solar(reading);
 	Display_Battery(reading);
 	Display_Load(reading);
-//	Display_Weather(reading);
-	Display_Status();
+	if (SW1)
+		Display_Weather(reading);
+	else
+		Display_Status();
+	
+
 }
 
 void Check_buttoms()
 {
-	unsigned long m = millis();
-
 	if (SW1)
 	{
 		SleepCountDownSec = WAKE_TIME;
@@ -214,9 +205,10 @@ void Check_buttoms()
 	}
 	if (SW3)
 	{
-		Load4ChargeCountDownSec = MAX_RYOBI_CHARGE_TIME;
-		SleepCountDownSec = MAX_RYOBI_CHARGE_TIME;
+		Load4ChargeCountDownSec = MAX_LOAD4_CHARGE_TIME;
+		SleepCountDownSec = MAX_LOAD4_CHARGE_TIME;
 		ControlBacklight(true);
+		RELAY_ON;
 	}
 
 

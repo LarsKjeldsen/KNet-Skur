@@ -16,17 +16,15 @@ Reading::Reading()
 	Solar1.begin(&Wire1);
 	Solar2.begin(&Wire1);
 	Charger.begin(&Wire1);
-//	Batt.begin(&Wire1);
 
 	ina3221.begin(SDA_INA33221, SCL_INA33221);
 
 	Solar1.setCalibration_32V_2A();
 	Solar2.setCalibration_32V_2A();
 	Charger.setCalibration_32V_2A();
-//	Batt.setCalibration_32V_2A();
 
 	Serial.println("Starting BME");
-	while ((!bme.begin(0x76)) && (c < 1)) {
+	while ((!bme.begin(0x76, &Wire1)) && (c < 10)) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
 		c++;                              
@@ -38,10 +36,12 @@ Reading::Reading()
 
 	bme.setSampling(
 		Adafruit_BME280::MODE_NORMAL,
+//Adafruit_BME280::MODE_FORCED
 		Adafruit_BME280::SAMPLING_X1,
 		Adafruit_BME280::SAMPLING_X1,
 		Adafruit_BME280::SAMPLING_X1,
 		Adafruit_BME280::FILTER_X4,
+//		Adafruit_BME280::FILTER_OFF,
 		Adafruit_BME280::STANDBY_MS_62_5);
 
 	Serial.println("Completed Startup");
@@ -60,8 +60,10 @@ void Reading::Get_power()
 	Load2_mA = ina3221.getCurrent_mA(2);
 	Load3_mA = ina3221.getCurrent_mA(3);
 
-	Load4_mA = Get_Load4_mA();
-	Serial.println(Load4_mA);
+	if (Load4ChargeCountDownSec <= 0)  // Remove noise when relay is off.
+		Load4_mA = 0;
+	else
+		Load4_mA = Get_Load4_mA();
 
 	Battery_V = ina3221.getBusVoltage_V(1);
 /*
@@ -71,6 +73,8 @@ void Reading::Get_power()
 	Serial.print("Charger     = "); Serial.print(Charger_mA); Serial.print(" / "); Serial.println(Charger_V);
 	Serial.print("L1_mA1   = "); Serial.print(load1_mA);  Serial.print(" / "); Serial.println(Load_V);
 	Serial.print("L2_mA2   = "); Serial.print(load2_mA);  Serial.print(" / "); Serial.println(Load_V);
+	Serial.print("L3_mA2   = "); Serial.println(load3_mA);
+	Serial.print("L4_mA2   = "); Serial.println(load4_mA);
 */
 }
 
@@ -81,6 +85,10 @@ void Reading::Get_weather()
 	Press = bme.readPressure() / 100.0F;
 	Temp = bme.readTemperature();
 	Humid = bme.readHumidity();
+
+	Press = 1234;
+	Temp = -12.3;
+	Humid = 56;
 }
 
 extern uint16_t millivolt[];

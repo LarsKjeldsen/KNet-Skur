@@ -15,6 +15,7 @@ WiFiClient ethClient;
 IPAddress MQTTServer(192, 168, 1, 21);
 PubSubClient MQTTclient(ethClient);
 
+HTTPClient httpClient;
 
 
 void WiFi_Setup()
@@ -101,7 +102,10 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Vejr_v2/Fugtighed", r->Humid);
 	SendMQTT("KNet/Haven/Vejr_v2/Lufttryk", r->Press);
 
-	WIFI_disconnect();
+	Maintanance_mode = GetStatusCode();
+
+	if (!Maintanance_mode)
+		WIFI_disconnect();
 }
 
 void MQTT_Setup()
@@ -160,3 +164,32 @@ void SendMQTT(char* Topic, float payload)
 	MQTTclient.publish(Topic, s, false);
 }
 
+
+int GetStatusCode()
+{
+
+	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
+	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkMWYyMTkyODA1ODQ0ZDMwYTVhZjJlN2E0MmJiYjUwNyIsImlhdCI6MTYxNDY3MTQ2NCwiZXhwIjoxOTMwMDMxNDY0fQ.UiuVA_HkKrm6oDAgZ_u69xEmiIvUR0-T_q8H6vyaeaQ");
+	httpClient.addHeader("Content-Type", "application/json");
+
+	int httpCode = httpClient.GET();
+
+	if (httpCode == -11)  // Try again.
+	{
+		httpCode = httpClient.GET();
+		Serial.print("*************** Retrying HTTP request httpcode = "); Serial.println(httpCode);
+	}
+
+	if (httpCode > 0) { //Check for the returning code
+
+		String payload = httpClient.getString();
+		cJSON* root = cJSON_Parse(payload.c_str());
+		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
+		if (besked_raw == "on")
+		{
+			Serial.println(("debug = " + besked_raw).c_str());
+			return true;
+		}
+	}
+	return false;
+}

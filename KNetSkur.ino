@@ -63,6 +63,7 @@ void setup()
 	WiFi_Setup();
 	Display_Text("Starter MQTT", 3);
 	MQTT_Setup();
+	Display_Text("Starter BME280", 3);
 
 	reading = new Reading();
 

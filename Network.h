@@ -14,9 +14,9 @@ extern RTC_NOINIT_ATTR bool Maintanance_mode;
 void WiFi_Setup();
 void MQTT_Setup();
 
-void SendMQTT(char *Topic, char *payload);
-void SendMQTT(char *Topic, int32_t payload);
-void SendMQTT(char *Topic, float payload);
+void SendMQTT(const char *Topic, char *payload);
+void SendMQTT(const char *Topic, int32_t payload);
+void SendMQTT(const char *Topic, float payload);
 
 void Send_reading(Reading *);
 int GetStatusCode();

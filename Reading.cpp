@@ -85,10 +85,6 @@ void Reading::Get_weather()
 	Press = bme.readPressure() / 100.0F;
 	Temp = bme.readTemperature();
 	Humid = bme.readHumidity();
-
-	Press = 1234;
-	Temp = -12.3;
-	Humid = 56;
 }
 
 extern uint16_t millivolt[];

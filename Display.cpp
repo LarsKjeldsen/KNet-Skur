@@ -9,7 +9,7 @@ void Display_Setup()
 	lcd.init();
 }
 
-void Display_Text(char * text, int line)
+void Display_Text(const char * text, int line)
 {
 	lcd.setCursor(0, line);
 	lcd.print(text);

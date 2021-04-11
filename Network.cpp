@@ -6,7 +6,7 @@
 char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
 
-IPAddress ip(192, 168, 1, 217);
+IPAddress ip(192, 168, 1, 218);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 
@@ -28,8 +28,9 @@ void WiFi_Setup()
 	WiFi.config(ip, gw, mask);
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
-		delay(100);
-		Serial.print(".");
+		delay(250);
+		Serial.print(WiFi.status());
+		Serial.print(" ");
 		if (i++ >= 50)
 			ESP.restart();
 	}
@@ -68,39 +69,44 @@ void WiFi_Setup()
 
 void WIFI_disconnect()
 {
+	int i = 0;
 	Serial.println("WIFI disconnect");
 
 	MQTTclient.disconnect();
 
+
 	while (MQTTclient.state() != -1) {
-		delay(10);
+		delay(100);
 		MQTTclient.loop();
+		if (i++ >= 50)
+			ESP.restart();
 	}
 	
 	delay(10);
 
+//	WiFi.disconnect(true,  false);
 	WiFi.mode(WIFI_OFF);
 }
 
 void Send_reading(Reading* r)
 {
-	SendMQTT("KNet/Haven/Skur_v2/Solar1_mA", r->Solar1_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Solar1_V", r->Solar1_V);
-	SendMQTT("KNet/Haven/Skur_v2/Solar2_mA", r->Solar2_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Solar2_V", r->Solar2_V);
-	SendMQTT("KNet/Haven/Skur_v2/Battery_mA", r->Load1_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Battery_V", r->Battery_V);
-	SendMQTT("KNet/Haven/Skur_v2/Charger_mA", r->Charger_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Charger_V", r->Charger_V);
-	SendMQTT("KNet/Haven/Skur_v2/Load1_mA", r->Load1_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load2_mA", r->Load2_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load3_mA", r->Load3_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load4_mA", r->Load4_mA);
-	SendMQTT("KNet/Haven/Skur_v2/Load_V", r->Load_V);
+	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);
+	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);
+	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);
+	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V);
+	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);
+	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);
+	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA);
+	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V);
+	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA);
+	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA);
+	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
+	SendMQTT("KNet/Haven/Skur/Load_V", r->Load_V);
 
-	SendMQTT("KNet/Haven/Vejr_v2/Temperatur", r->Temp);
-	SendMQTT("KNet/Haven/Vejr_v2/Fugtighed", r->Humid);
-	SendMQTT("KNet/Haven/Vejr_v2/Lufttryk", r->Press);
+	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);
+	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);
+	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);
 
 	Maintanance_mode = GetStatusCode();
 
@@ -142,7 +148,7 @@ void MQTT_Setup()
 }
 
 
-void SendMQTT(char* Topic, int32_t payload)
+void SendMQTT(const char* Topic, int32_t payload)
 {
 	if (!MQTTclient.connected())
 		MQTT_Setup();
@@ -153,7 +159,7 @@ void SendMQTT(char* Topic, int32_t payload)
 	MQTTclient.publish(Topic, s, false);
 }
 
-void SendMQTT(char* Topic, float payload)
+void SendMQTT(const char* Topic, float payload)
 {
 	if (!MQTTclient.connected())
 		MQTT_Setup();
@@ -169,7 +175,7 @@ int GetStatusCode()
 {
 
 	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkMWYyMTkyODA1ODQ0ZDMwYTVhZjJlN2E0MmJiYjUwNyIsImlhdCI6MTYxNDY3MTQ2NCwiZXhwIjoxOTMwMDMxNDY0fQ.UiuVA_HkKrm6oDAgZ_u69xEmiIvUR0-T_q8H6vyaeaQ");
+	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwMmEyNmYxZDViMDE0MWIxODhkNWMxZGM0NTk1ZjcxNCIsImlhdCI6MTYxNzM2NzY0MSwiZXhwIjoxOTMyNzI3NjQxfQ.iJ0YQy9E4U9Rwbs9EJMYl1-DIoBHCW6AAB0rL3mAsEw");
 	httpClient.addHeader("Content-Type", "application/json");
 
 	int httpCode = httpClient.GET();
@@ -177,7 +183,6 @@ int GetStatusCode()
 	if (httpCode == -11)  // Try again.
 	{
 		httpCode = httpClient.GET();
-		Serial.print("*************** Retrying HTTP request httpcode = "); Serial.println(httpCode);
 	}
 
 	if (httpCode > 0) { //Check for the returning code
@@ -185,9 +190,11 @@ int GetStatusCode()
 		String payload = httpClient.getString();
 		cJSON* root = cJSON_Parse(payload.c_str());
 		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
+		if (besked_raw == NULL)
+			return false;
 		if (besked_raw == "on")
 		{
-			Serial.println(("debug = " + besked_raw).c_str());
+//			Serial.println(("debug = " + besked_raw).c_str());
 			return true;
 		}
 	}

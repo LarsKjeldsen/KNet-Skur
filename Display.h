@@ -18,10 +18,9 @@ void Display_Load(Reading *);
 void Display_Countdown(int32_t);
 void Display_Weather(Reading *);
 void ControlBacklight(bool);
-void Display_Text(char*, int);
+void Display_Text(const char*, int);
 void Display_Clear();
 void Display_Status();
-void Display_load_mA(int);
 
 #endif
 

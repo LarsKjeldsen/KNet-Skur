@@ -39,7 +39,7 @@
 Reading* reading;
 
 #define WAKE_TIME 600 // 10 minute
-#define SEND_READING_INTERVAL 60
+#define SEND_READING_INTERVAL 55
 #define LIGHT_DELAY_SECOND 600  // 10 min.
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
 
@@ -58,7 +58,6 @@ void setup()
 	Display_Setup();
 	Display_Text("Starter BME ", 3);
 	HW_setup();
-
 	Display_Text("Starter WiFi", 3);
 	WiFi_Setup();
 	Display_Text("Starter MQTT", 3);
@@ -133,7 +132,7 @@ void loop()
 		Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
-		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
+		esp_sleep_enable_timer_wakeup(9UL * 1000000UL);
 		esp_light_sleep_start();
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 		wakeup_reason();

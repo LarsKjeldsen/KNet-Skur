@@ -85,6 +85,8 @@ void Reading::Get_weather()
 	Press = bme.readPressure() / 100.0F;
 	Temp = bme.readTemperature();
 	Humid = bme.readHumidity();
+
+//	Serial.printf("T: %.2f -P: %.2f -H: %.2f\n", Temp, Press, Humid);
 }
 
 extern uint16_t millivolt[];

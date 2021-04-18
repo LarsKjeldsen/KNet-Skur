@@ -77,8 +77,9 @@ void WIFI_disconnect()
 
 	while (MQTTclient.state() != -1) {
 		delay(100);
+		Serial.print('D');
 		MQTTclient.loop();
-		if (i++ >= 50)
+		if (i++ >= 20)
 			ESP.restart();
 	}
 	
@@ -90,26 +91,34 @@ void WIFI_disconnect()
 
 void Send_reading(Reading* r)
 {
-	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);
-	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);
-	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);
-	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V);
-	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);
-	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);
-	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA);
-	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V);
-	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA);
-	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA);
-	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);
-	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
-	SendMQTT("KNet/Haven/Skur/Load_V", r->Load_V);
+	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load_V", r->Load_V); delay(10);
 
-	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);
-	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);
+	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp); delay(10);
+	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid); delay(10);
 	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);
 
-	Maintanance_mode = GetStatusCode();
+	// What for all publish to finalyse
+	int i = 0;
+	while (i++ < 100) {
+		delay(10);
+		MQTTclient.loop();
+	}
 
+	MQTTclient.disconnect();
+
+	Maintanance_mode = GetStatusCode();
 	if (!Maintanance_mode)
 		WIFI_disconnect();
 }
@@ -118,7 +127,7 @@ void MQTT_Setup()
 {
 	int c = 0;
 
-	Serial.println("MQTT_Setup");
+	Serial.print("MQTT_Setup");
 
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
@@ -138,13 +147,14 @@ void MQTT_Setup()
 		// Attempt to connect
 		MQTTclient.connect(clientId.c_str());
 
-		delay(100);
+		delay(250);
 		Serial.println("ERROR");
 		if (c++ >= 10) {
 			Serial.println("Unable to connect to MQTT, ESP is restarting.");
 			ESP.restart();
 		}
 	}
+	Serial.println("  Done");
 }
 
 
@@ -155,7 +165,7 @@ void SendMQTT(const char* Topic, int32_t payload)
 
 	char s[20];
 	itoa(payload, s, 10);
-
+//	Serial.print("Sending : "); Serial.println(s);
 	MQTTclient.publish(Topic, s, false);
 }
 
@@ -164,9 +174,9 @@ void SendMQTT(const char* Topic, float payload)
 	if (!MQTTclient.connected())
 		MQTT_Setup();
 
-	char s[20];
-	dtostrf(payload, 4, 1, s);
-
+	char s[30];
+	dtostrf(payload, 5, 2, s);
+//	Serial.print("Sending : "); Serial.println(s);
 	MQTTclient.publish(Topic, s, false);
 }
 
@@ -190,6 +200,7 @@ int GetStatusCode()
 		String payload = httpClient.getString();
 		cJSON* root = cJSON_Parse(payload.c_str());
 		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
+		Serial.println("Besked : " + besked_raw);
 		if (besked_raw == NULL)
 			return false;
 		if (besked_raw == "on")

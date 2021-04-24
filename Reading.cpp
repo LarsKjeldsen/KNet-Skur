@@ -23,27 +23,6 @@ Reading::Reading()
 	Solar2.setCalibration_32V_2A();
 	Charger.setCalibration_32V_2A();
 
-	Serial.println("Starting BME");
-	while ((!bme.begin(0x76, &Wire1)) && (c < 10)) {
-		Serial.println("Could not find BME280 sensor!");
-		delay(1000);
-		c++;                              
-	}
-	if (c < 10)
-		Serial.println("BME280 sensor OK !");
-	else
-		Serial.println("BME280 ERROR starting device");
-
-	bme.setSampling(
-		Adafruit_BME280::MODE_NORMAL,
-//Adafruit_BME280::MODE_FORCED
-		Adafruit_BME280::SAMPLING_X1,
-		Adafruit_BME280::SAMPLING_X1,
-		Adafruit_BME280::SAMPLING_X1,
-		Adafruit_BME280::FILTER_X4,
-//		Adafruit_BME280::FILTER_OFF,
-		Adafruit_BME280::STANDBY_MS_62_5);
-
 	Serial.println("Completed Startup");
 }
 
@@ -66,28 +45,17 @@ void Reading::Get_power()
 		Load4_mA = Get_Load4_mA();
 
 	Battery_V = ina3221.getBusVoltage_V(1);
-/*
-	Serial.print("Solar1      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
-	Serial.print("Solar2      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);
-	Serial.print("Battery     = "); Serial.print(Battery_mA); Serial.print(" / "); Serial.println(Battery_V);
-	Serial.print("Charger     = "); Serial.print(Charger_mA); Serial.print(" / "); Serial.println(Charger_V);
-	Serial.print("L1_mA1   = "); Serial.print(load1_mA);  Serial.print(" / "); Serial.println(Load_V);
-	Serial.print("L2_mA2   = "); Serial.print(load2_mA);  Serial.print(" / "); Serial.println(Load_V);
-	Serial.print("L3_mA2   = "); Serial.println(load3_mA);
-	Serial.print("L4_mA2   = "); Serial.println(load4_mA);
-*/
+
+	//Serial.print("Solar1      = "); Serial.print(Solar1_mA);  Serial.print(" / "); Serial.println(Solar1_V);
+	//Serial.print("Solar2      = "); Serial.print(Solar2_mA);  Serial.print(" / "); Serial.println(Solar2_V);
+	//Serial.print("Battery     = "); Serial.print(" / "); Serial.println(Battery_V);
+	//Serial.print("Charger     = "); Serial.print(Charger_mA); Serial.print(" / "); Serial.println(Charger_V);
+	//Serial.print("L1_mA1   = "); Serial.print(Load1_mA);  Serial.print(" / "); Serial.println(Load_V);
+	//Serial.print("L2_mA2   = "); Serial.print(Load2_mA);  Serial.print(" / "); Serial.println(Load_V);
+	//Serial.print("L3_mA2   = "); Serial.println(Load3_mA);
+	//Serial.print("L4_mA2   = "); Serial.println(Load4_mA);
 }
 
-
-void Reading::Get_weather()
-{
-//	bme.read(Press, Temp, Humid, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
-	Press = bme.readPressure() / 100.0F;
-	Temp = bme.readTemperature();
-	Humid = bme.readHumidity();
-
-//	Serial.printf("T: %.2f -P: %.2f -H: %.2f\n", Temp, Press, Humid);
-}
 
 extern uint16_t millivolt[];
 static int p = 0;

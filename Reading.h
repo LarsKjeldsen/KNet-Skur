@@ -5,7 +5,6 @@
 
 #include "Arduino.h"
 #include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
 #include <Adafruit_INA219.h>
 #include "INA3221.h"
 #include <Wire.h>
@@ -27,17 +26,10 @@ public:
 	int16_t Load3_mA;
 	int16_t Load4_mA;
 
-	void Get_weather();
 	void Get_power();
 	uint16_t Get_Load4_mA();
 
-	float Temp;
-	float Humid;
-	float Press;
-
 private:
-	Adafruit_BME280 bme;
-	
 	Adafruit_INA219 Solar1  {0x40};
 	Adafruit_INA219 Solar2  {0x41};
 	Adafruit_INA219 Charger {0x44};

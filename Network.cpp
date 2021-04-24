@@ -30,7 +30,7 @@ void WiFi_Setup()
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(250);
 		Serial.print(WiFi.status());
-		Serial.print(" ");
+		Serial.print("W");
 		if (i++ >= 50)
 			ESP.restart();
 	}
@@ -91,6 +91,10 @@ void WIFI_disconnect()
 
 void Send_reading(Reading* r)
 {
+//	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp); delay(10);
+//	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid); delay(10);
+//	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press); delay(10);
+
 	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA); delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V); delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA); delay(10);
@@ -102,21 +106,22 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA); delay(10);
 	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA); delay(10);
 	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load_V", r->Load_V); delay(10);
-
-	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp); delay(10);
-	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid); delay(10);
-	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
 
 	// What for all publish to finalyse
-	int i = 0;
-	while (i++ < 100) {
-		delay(10);
-		MQTTclient.loop();
-	}
+	//int i = 0;
+	//while (i++ < 100) {
+	//	delay(20);
+	//	MQTTclient.loop();
+	//}
 
+	int i = 0;
 	MQTTclient.disconnect();
+	while (MQTTclient.state() != -1) {
+		if (i++ > 500)
+			ESP.restart();
+		delay(10);
+	}
 
 	Maintanance_mode = GetStatusCode();
 	if (!Maintanance_mode)
@@ -125,9 +130,9 @@ void Send_reading(Reading* r)
 
 void MQTT_Setup()
 {
-	int c = 0;
+	int i = 0;
 
-	Serial.print("MQTT_Setup");
+	Serial.println("MQTT_Setup");
 
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
@@ -149,7 +154,7 @@ void MQTT_Setup()
 
 		delay(250);
 		Serial.println("ERROR");
-		if (c++ >= 10) {
+		if (i++ >= 10) {
 			Serial.println("Unable to connect to MQTT, ESP is restarting.");
 			ESP.restart();
 		}
@@ -200,14 +205,10 @@ int GetStatusCode()
 		String payload = httpClient.getString();
 		cJSON* root = cJSON_Parse(payload.c_str());
 		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
-		Serial.println("Besked : " + besked_raw);
 		if (besked_raw == NULL)
 			return false;
 		if (besked_raw == "on")
-		{
-//			Serial.println(("debug = " + besked_raw).c_str());
 			return true;
-		}
 	}
 	return false;
 }

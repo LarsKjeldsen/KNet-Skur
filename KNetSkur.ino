@@ -25,7 +25,6 @@
 #include <SimpleBLE.h>
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
-#include <Adafruit_BME280.h>
 #include <Adafruit_INA219.h>
 #include "INA3221.h"
 #include <PubSubClient.h>
@@ -39,12 +38,12 @@
 Reading* reading;
 
 #define WAKE_TIME 600 // 10 minute
-#define SEND_READING_INTERVAL 55
+#define SEND_READING_INTERVAL 49
 #define LIGHT_DELAY_SECOND 600  // 10 min.
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
 
 int Next_reading = 0;
-int millisec = 0;
+unsigned long millisec = 0;
 
 RTC_NOINIT_ATTR bool Maintanance_mode;
 
@@ -66,7 +65,6 @@ void setup()
 
 	reading = new Reading();
 
-	reading->Get_weather();
 	reading->Get_power();
 	Send_reading(reading);
 
@@ -96,12 +94,12 @@ void setup()
 
 void loop()
 {
-	ArduinoOTA.handle();
-
 	unsigned long m = millis();
-	Get_reading();
-	Update_display();
+
 	Update_timers();
+
+	if (Maintanance_mode)
+		ArduinoOTA.handle();
 
 	if (millisec < m)
 	{
@@ -110,6 +108,8 @@ void loop()
 			Sec_Tick();
 		}
 		while (millisec < m);
+		Get_reading();
+		Update_display();
 	}
 
 	if (ReadingCountDownSec <= 0)
@@ -132,7 +132,7 @@ void loop()
 		Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
-		esp_sleep_enable_timer_wakeup(9UL * 1000000UL);
+		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		esp_light_sleep_start();
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 		wakeup_reason();
@@ -155,6 +155,7 @@ void Sec_Tick()
 
 	if (Load4ChargeCountDownSec > 0)
 		Load4ChargeCountDownSec--;
+
 }
 
 
@@ -168,7 +169,6 @@ void Update_timers()
 void Get_reading()
 {
 	reading->Get_power();
-	reading->Get_weather();
 }
 
 void Update_display()
@@ -176,12 +176,7 @@ void Update_display()
 	Display_Solar(reading);
 	Display_Battery(reading);
 	Display_Load(reading);
-	if (SW1)
-		Display_Weather(reading);
-	else
-		Display_Status();
-	
-
+	Display_Status();
 }
 
 void Check_buttoms()

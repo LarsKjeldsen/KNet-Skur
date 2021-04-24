@@ -55,17 +55,6 @@ void Display_Status()
 }
 
 
-void Display_Weather(Reading * r)
-{
-//	char Temparture[10], Humidity[10], Presure[10];
-//	dtostrf(r->Temp, 4, 6, Temparture);
-//	dtostrf(r->Humid, 4, 6, Humidity);
-//	dtostrf(r->Press, 4, 6, Presure);
-
-	lcd.setCursor(0, 3);
-	lcd.printf("%2.1fC %2.0f%% %5.0fPa  ", r->Temp, r->Humid, r->Press);
-}
-
 
 void ControlBacklight(bool backlight)
 {

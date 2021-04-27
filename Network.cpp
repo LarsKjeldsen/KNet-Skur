@@ -33,8 +33,7 @@ void WiFi_Setup()
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(250);
-		Serial.print(WiFi.status());
-		Serial.print("W");
+		Serial.print('.');
 		if (i++ >= 50)
 			ESP.restart();
 	}
@@ -49,7 +48,6 @@ void WiFi_Setup()
 
 void WIFI_disconnect()
 {
-	Serial.print("4");
 	int i = 0;
 
 	MQTTclient.disconnect();

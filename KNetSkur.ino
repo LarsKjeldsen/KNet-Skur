@@ -132,10 +132,8 @@ void loop()
 		Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
-		Serial.print("..A");   Serial.flush();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		esp_light_sleep_start();
-		Serial.println("..B");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 
 		Serial.println(ESP.getFreeHeap());

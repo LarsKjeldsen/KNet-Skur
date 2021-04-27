@@ -45,7 +45,7 @@ Reading* reading;
 int Next_reading = 0;
 unsigned long millisec = 0;
 
-RTC_NOINIT_ATTR bool Maintanance_mode;
+RTC_NOINIT_ATTR bool Maintanance_mode = false;
 
 void setup()
 {
@@ -59,9 +59,9 @@ void setup()
 	HW_setup();
 	Display_Text("Starter WiFi", 3);
 	WiFi_Setup();
+	OTA_Setup();
 	Display_Text("Starter MQTT", 3);
-	MQTT_Setup();
-	Display_Text("Starter BME280", 3);
+	MQTT_Initial_setup();
 
 	reading = new Reading();
 
@@ -132,10 +132,15 @@ void loop()
 		Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
+		Serial.print("..A");   Serial.flush();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		esp_light_sleep_start();
+		Serial.println("..B");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
-		wakeup_reason();
+
+		Serial.println(ESP.getFreeHeap());
+
+//		wakeup_reason();
 	}
 	
 	Check_buttoms();

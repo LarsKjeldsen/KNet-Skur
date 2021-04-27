@@ -6,6 +6,8 @@
 char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
 
+const char clientId[] = "Skur_V2";
+
 IPAddress ip(192, 168, 1, 218);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
@@ -18,14 +20,16 @@ PubSubClient MQTTclient(ethClient);
 HTTPClient httpClient;
 
 
+
 void WiFi_Setup()
 {
-	Serial.println("WIFI Setup");
+	Serial.print("WIFI Setup");
 
 	int i = 0;
 	WiFi.mode(WIFI_STA);
+	WiFi.persistent(false);     // <-- prevents flash wearing?
 
-	WiFi.config(ip, gw, mask);
+//	WiFi.config(ip, gw, mask);
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(250);
@@ -35,6 +39,184 @@ void WiFi_Setup()
 			ESP.restart();
 	}
 
+	Serial.println("");
+	Serial.print("WiFi connected IP address: ");
+	Serial.println(WiFi.localIP());
+}
+
+
+
+
+void WIFI_disconnect()
+{
+	Serial.print("4");
+	int i = 0;
+
+	MQTTclient.disconnect();
+
+	while (MQTTclient.state() != -1) {
+		delay(100);
+		MQTTclient.loop();
+		if (i++ >= 20)
+			ESP.restart();
+	}
+	delay(10);
+
+	WiFi.mode(WIFI_OFF);
+	WiFi.disconnect(true, false);
+}
+
+void Send_reading(Reading* r)
+{
+	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
+
+	delay(1000);
+
+	Maintanance_mode = GetStatusCode();
+	if (!Maintanance_mode)
+		WIFI_disconnect();
+}
+
+void MQTT_Initial_setup()
+{
+	int i = 0;
+
+	Serial.println("MQTT_Setup");
+
+	if (WiFi.status() != WL_CONNECTED)
+		WiFi_Setup();
+
+	String IP = WiFi.localIP().toString();
+
+	MQTTclient.setServer(MQTTServer, 1883);
+	MQTTclient.setSocketTimeout(120);
+	MQTTclient.setKeepAlive(120);
+	if (!MQTTclient.connected()) {
+		Serial.println("Connect MQTT");
+		MQTTclient.connect(clientId);
+	}
+	while (!MQTTclient.connected())
+	{
+		Serial.print("Attempting MQTT connection... : ");
+		// Attempt to connect
+		MQTTclient.connect(clientId);
+		delay(250);
+		Serial.println("ERROR");
+		if (i++ >= 10) {
+			Serial.println("Unable to connect to MQTT, ESP is restarting.");  Serial.flush();
+			ESP.restart();
+		}
+	}
+}
+
+
+void MQTT_Setup()
+{
+	int i = 0;
+
+	Serial.println("MQTT_Setup");
+
+	if (WiFi.status() != WL_CONNECTED)
+		WiFi_Setup();
+
+	if (!MQTTclient.connected()) {
+		Serial.println("Connect MQTT");
+		MQTTclient.connect(clientId);
+	}
+
+	while (!MQTTclient.connected())
+	{
+		Serial.print("Attempting MQTT connection... : ");
+		// Attempt to connect
+		MQTTclient.connect(clientId);
+		delay(250);
+		Serial.println("ERROR");
+		if (i++ >= 10) {
+			Serial.println("Unable to connect to MQTT, ESP is restarting.");  Serial.flush();
+			ESP.restart();
+		}
+	}
+}
+
+
+void SendMQTT(const char* Topic, int32_t payload)
+{
+	bool ret;
+
+	if (!MQTTclient.connected())
+		MQTT_Setup();
+	
+	char s[20];
+	itoa(payload, s, 10);
+	ret = MQTTclient.publish(Topic, s, false);
+	if (!ret)
+		ESP.restart();
+}
+
+void SendMQTT(const char* Topic, float payload)
+{
+	bool ret;
+
+	if (!MQTTclient.connected())
+		MQTT_Setup();
+
+	char s[30];
+	dtostrf(payload, 5, 2, s);
+	ret = MQTTclient.publish(Topic, s, false);
+	if (!ret)
+		ESP.restart();
+}
+
+
+int GetStatusCode()
+{
+	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
+	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwMmEyNmYxZDViMDE0MWIxODhkNWMxZGM0NTk1ZjcxNCIsImlhdCI6MTYxNzM2NzY0MSwiZXhwIjoxOTMyNzI3NjQxfQ.iJ0YQy9E4U9Rwbs9EJMYl1-DIoBHCW6AAB0rL3mAsEw");
+	httpClient.addHeader("Content-Type", "application/json");
+
+	int httpCode = httpClient.GET();
+
+	if (httpCode == -11)  // Try again.
+	{
+		httpCode = httpClient.GET();
+	}
+
+
+	if (httpCode > 0) { //Check for the returning code
+
+		String payload = httpClient.getString();
+
+		cJSON* root = cJSON_Parse(payload.c_str());
+		if (root == NULL) {
+			cJSON_Delete(root);
+			return false;
+		}
+
+		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
+		cJSON_Delete(root);
+
+		if (besked_raw == NULL)
+			return false;
+		if (besked_raw == "on")
+			return true;
+	}
+	return false;
+}
+
+
+void OTA_Setup()
+{
 	ArduinoOTA.setHostname("KNetSkurV2");
 
 	ArduinoOTA.onStart([]() {
@@ -64,151 +246,3 @@ void WiFi_Setup()
 	Serial.println(WiFi.localIP());
 }
 
-
-
-
-void WIFI_disconnect()
-{
-	int i = 0;
-	Serial.println("WIFI disconnect");
-
-	MQTTclient.disconnect();
-
-
-	while (MQTTclient.state() != -1) {
-		delay(100);
-		Serial.print('D');
-		MQTTclient.loop();
-		if (i++ >= 20)
-			ESP.restart();
-	}
-	
-	delay(10);
-
-//	WiFi.disconnect(true,  false);
-	WiFi.mode(WIFI_OFF);
-}
-
-void Send_reading(Reading* r)
-{
-//	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp); delay(10);
-//	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid); delay(10);
-//	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press); delay(10);
-
-	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V); delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V); delay(10);
-	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V); delay(10);
-	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
-
-	// What for all publish to finalyse
-	//int i = 0;
-	//while (i++ < 100) {
-	//	delay(20);
-	//	MQTTclient.loop();
-	//}
-
-	int i = 0;
-	MQTTclient.disconnect();
-	while (MQTTclient.state() != -1) {
-		if (i++ > 500)
-			ESP.restart();
-		delay(10);
-	}
-
-	Maintanance_mode = GetStatusCode();
-	if (!Maintanance_mode)
-		WIFI_disconnect();
-}
-
-void MQTT_Setup()
-{
-	int i = 0;
-
-	Serial.println("MQTT_Setup");
-
-	if (WiFi.status() != WL_CONNECTED)
-		WiFi_Setup();
-
-	String IP = WiFi.localIP().toString();
-
-	MQTTclient.setServer(MQTTServer, 1883);
-	MQTTclient.setSocketTimeout(120);
-	MQTTclient.setKeepAlive(120);
-	String clientId = "Skur_V2" + IP;
-
-	MQTTclient.connect(clientId.c_str());
-
-	while (!MQTTclient.connected())
-	{
-		Serial.print("Attempting MQTT connection... : ");
-		// Attempt to connect
-		MQTTclient.connect(clientId.c_str());
-
-		delay(250);
-		Serial.println("ERROR");
-		if (i++ >= 10) {
-			Serial.println("Unable to connect to MQTT, ESP is restarting.");
-			ESP.restart();
-		}
-	}
-	Serial.println("  Done");
-}
-
-
-void SendMQTT(const char* Topic, int32_t payload)
-{
-	if (!MQTTclient.connected())
-		MQTT_Setup();
-
-	char s[20];
-	itoa(payload, s, 10);
-//	Serial.print("Sending : "); Serial.println(s);
-	MQTTclient.publish(Topic, s, false);
-}
-
-void SendMQTT(const char* Topic, float payload)
-{
-	if (!MQTTclient.connected())
-		MQTT_Setup();
-
-	char s[30];
-	dtostrf(payload, 5, 2, s);
-//	Serial.print("Sending : "); Serial.println(s);
-	MQTTclient.publish(Topic, s, false);
-}
-
-
-int GetStatusCode()
-{
-
-	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwMmEyNmYxZDViMDE0MWIxODhkNWMxZGM0NTk1ZjcxNCIsImlhdCI6MTYxNzM2NzY0MSwiZXhwIjoxOTMyNzI3NjQxfQ.iJ0YQy9E4U9Rwbs9EJMYl1-DIoBHCW6AAB0rL3mAsEw");
-	httpClient.addHeader("Content-Type", "application/json");
-
-	int httpCode = httpClient.GET();
-
-	if (httpCode == -11)  // Try again.
-	{
-		httpCode = httpClient.GET();
-	}
-
-	if (httpCode > 0) { //Check for the returning code
-
-		String payload = httpClient.getString();
-		cJSON* root = cJSON_Parse(payload.c_str());
-		String besked_raw = cJSON_GetObjectItem(root, "state")->valuestring;
-		if (besked_raw == NULL)
-			return false;
-		if (besked_raw == "on")
-			return true;
-	}
-	return false;
-}

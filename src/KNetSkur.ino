@@ -66,7 +66,10 @@ void setup()
 
 	reading = new Reading();
 
+	reading->Get_WaterReading();
 	reading->Get_power();
+	reading->Get_weather();
+
 	Send_reading(reading);
 
 	//	Second_LightCountdown = 120;
@@ -109,7 +112,11 @@ void loop()
 			Sec_Tick();
 		}
 		while (millisec < m);
-		Get_reading();
+		reading->Get_WaterReading();
+		reading->Get_power();
+		reading->Get_weather();
+
+Serial.printf("T: %.2f -P: %.2f -H: %.2f -L:%d\n", reading->Temp, reading->Press, reading->Humid, reading->Vandstand_mm);
 		Update_display();
 	}
 
@@ -134,6 +141,7 @@ void loop()
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
+		Serial.println("Going to sleep");
 		esp_light_sleep_start();
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
@@ -164,13 +172,6 @@ void Update_timers()
 {
 	unsigned long m = millis();
 	Count_Sec = m / 1000ul;
-}
-
-void Get_reading()
-{
-	reading->Get_WaterReading();
-	reading->Get_power();
-	reading->Get_weather();
 }
 
 void Update_display()

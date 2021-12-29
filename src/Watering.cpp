@@ -74,9 +74,9 @@ unsigned int Dist_single_reading()
 	Data_L = ReadByte(TIMEOUT);
 	checksum = ReadByte(TIMEOUT);
 
-//	Serial.print(Data_H, HEX); Serial.print(":");
-//	Serial.print(Data_L, HEX); Serial.print(":");
-//	Serial.print(checksum, HEX); Serial.print(": ");
+Serial.print(Data_H, HEX); Serial.print(":");
+Serial.print(Data_L, HEX); Serial.print(":");
+Serial.print(checksum, HEX); Serial.print(": ");
 
 	unsigned char sum;
 	sum = (Data_H + Data_L + 0xff) & 0xFF;

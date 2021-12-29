@@ -55,8 +55,6 @@ void Reading::Get_weather()
 	if (Press == NAN)
 		Press = bme.readPressure();
 	Press /= 100.0F;
-
-	Serial.printf("T: %.2f -P: %.2f -H: %.2f\n", Temp, Press, Humid);
 }
 
 

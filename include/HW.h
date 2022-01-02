@@ -15,6 +15,10 @@ extern int Count_Sec;
 
 #define SENCE_READINGS 10
 
+#define BMrE280_SPI_SCLK GPIO_NUM_26
+#define BMrE280_SPI_MOSI GPIO_NUM_17
+#define BMrE280_SPI_MISO GPIO_NUM_5
+#define BMrE280_SPI_EN   GPIO_NUM_2
 
 // HW
 #define TOUCH1_Pin GPIO_NUM_14

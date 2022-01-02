@@ -5,19 +5,12 @@
 SoftwareSerial dist_serial;
 
 
-#define NUM_WATER_READINGS 3
+
 int WaterPointer = 0;
 unsigned int WaterLevel[NUM_WATER_READINGS];
 unsigned int PreAvarage = 0;
-#define WATERVARIANCE 20  // Max diviasion in %
 
-void Dist_setup()
-{
-	for (int i = 0; i < NUM_WATER_READINGS; i++)
-		WaterLevel[i] = 0;
 
-	Serial2.begin(9600, SERIAL_8N1, GPIO_NUM_16, GPIO_NUM_17, false);
-}
 
 unsigned int Dist_get_reading()
 {
@@ -74,9 +67,9 @@ unsigned int Dist_single_reading()
 	Data_L = ReadByte(TIMEOUT);
 	checksum = ReadByte(TIMEOUT);
 
-Serial.print(Data_H, HEX); Serial.print(":");
-Serial.print(Data_L, HEX); Serial.print(":");
-Serial.print(checksum, HEX); Serial.print(": ");
+//Serial.print(Data_H, HEX); Serial.print(":");
+//Serial.print(Data_L, HEX); Serial.print(":");
+//Serial.print(checksum, HEX); Serial.print(": ");
 
 	unsigned char sum;
 	sum = (Data_H + Data_L + 0xff) & 0xFF;
@@ -87,7 +80,7 @@ Serial.print(checksum, HEX); Serial.print(": ");
 		
 //		Serial.print("Distance = "); Serial.print(distance); Serial.println(" cm");
 
-		if (distance > 30)
+		if (distance > 10)
 			return distance;
 		else
 		{

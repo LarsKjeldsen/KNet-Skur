@@ -179,7 +179,7 @@ void Update_display()
 	Display_Solar(reading);
 	Display_Battery(reading);
 	Display_Load(reading);
-	Display_Status();
+	Display_Status(reading);
 }
 
 void Check_buttoms()

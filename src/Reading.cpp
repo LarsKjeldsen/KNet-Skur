@@ -39,7 +39,12 @@ Reading::Reading()
 		Adafruit_BME280::FILTER_OFF,
 		Adafruit_BME280::STANDBY_MS_10);
 
-	Dist_setup();
+//
+	for (int i = 0; i < NUM_WATER_READINGS; i++)
+		WaterLevel[i] = 0;
+
+	Serial2.begin(9600, SERIAL_8N1, GPIO_NUM_16, GPIO_NUM_17, false);	
+//	Dist_setup();
 
 	Serial.println("Completed Startup");
 }

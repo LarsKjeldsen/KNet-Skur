@@ -23,23 +23,56 @@ void Display_Clear()
 
 void Display_Solar(Reading * r)
 {
+	#define DISPLAYLEN 20
+	char d[DISPLAYLEN * 2];  //  Just to be sure
 	lcd.setCursor(0, 0);
-	lcd.printf("Solar %4dmA  %4dmA", r->Solar1_mA, r->Solar2_mA);
+
+	sprintf(d, "Sol %dmA %d/%dV", r->Solar1_mA + r->Solar2_mA, (int)r->Solar1_V, (int)r->Solar2_V);
+	for (int i=strlen(d); i<DISPLAYLEN; i++)
+		d[i] = ' ';
+	d[DISPLAYLEN] = '\0';
+	lcd.print(d);
 }
 
 void Display_Battery(Reading * r)
 {
+	#define DISPLAYLEN 20
+	char d[DISPLAYLEN * 2];  //  Just to be sure
 	char s[20];
 	lcd.setCursor(0, 1);
-	lcd.printf("Bat  %5dmA  %sV", r->Charger_mA, dtostrf(r->Battery_V, 5, 2, s));
+	int Charge = 0;
+
+	if (r->Battery_V <= 11.31) Charge = 0;
+	if (r->Battery_V > 11.31) Charge = 10;
+	if (r->Battery_V > 11.58) Charge = 20;
+	if (r->Battery_V > 11.75) Charge = 30;
+	if (r->Battery_V > 11.90) Charge = 40;
+	if (r->Battery_V > 12.06) Charge = 50;
+	if (r->Battery_V > 12.20) Charge = 60;
+	if (r->Battery_V > 12.32) Charge = 70;
+	if (r->Battery_V > 12.42) Charge = 80;
+	if (r->Battery_V > 12.50) Charge = 90;
+	if (r->Battery_V > 12.70) Charge = 100;
+
+	sprintf(d, "Bat %dmA %sV %d%%", r->Charger_mA, dtostrf(r->Battery_V, 3, 1, s), Charge);
+	for (int i=strlen(d); i<DISPLAYLEN; i++)
+		d[i] = ' ';
+	d[DISPLAYLEN] = '\0';
+	lcd.print(d);
 }
 
 void Display_Load(Reading * r)
 {
-	lcd.setCursor(0, 2);
-	lcd.printf("%3d %3d %3d %3d", r->Load1_mA, r->Load2_mA, r->Load3_mA, r->Load4_mA);
-}
+	#define DISPLAYLEN 20
+	char d[DISPLAYLEN * 2];  //  Just to be sure
 
+	lcd.setCursor(0, 2);
+	sprintf(d, "Use %d %d %d %d", r->Load1_mA, r->Load2_mA, r->Load3_mA, r->Load4_mA);
+	for (int i=strlen(d); i<DISPLAYLEN; i++)
+		d[i] = ' ';
+	d[DISPLAYLEN] = '\0';
+	lcd.print(d);
+}
 
 void Display_sleeping()
 {
@@ -48,12 +81,18 @@ void Display_sleeping()
 }
 
 
-void Display_Status()
+void Display_Status(Reading * r)
 {
-	lcd.setCursor(0, 3);
-	lcd.printf("%3d, %3d            ", SleepCountDownSec, LightCountDownSec);
-}
+	#define DISPLAYLEN 20
+	char d[DISPLAYLEN * 2];  //  Just to be sure
 
+	lcd.setCursor(0, 3);
+	sprintf(d, "%dS %dC/%dP/%d%%", SleepCountDownSec, (int)r->Temp, (int)r->Press, (int)r->Humid);
+	for (int i=strlen(d); i<DISPLAYLEN; i++)
+		d[i] = ' ';
+	d[DISPLAYLEN] = '\0';
+	lcd.print(d);
+}
 
 
 void ControlBacklight(bool backlight)

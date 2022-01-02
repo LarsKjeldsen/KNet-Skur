@@ -65,18 +65,18 @@ void WIFI_disconnect()
 
 void Send_reading(Reading* r)
 {
-	SendMQTT("KNet/Haven/Skur2/Solar1_mA", r->Solar1_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur2/Solar1_V", r->Solar1_V);     delay(10);
-	SendMQTT("KNet/Haven/Skur2/Solar2_mA", r->Solar2_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur2/Solar2_V", r->Solar2_V);     delay(10);
-	SendMQTT("KNet/Haven/Skur2/Battery_mA", r->Load1_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur2/Battery_V", r->Battery_V);   delay(10);
-	SendMQTT("KNet/Haven/Skur2/Charger_mA", r->Charger_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur2/Charger_V", r->Charger_V);   delay(10);
-	SendMQTT("KNet/Haven/Skur2/Load1_mA", r->Load1_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur2/Load2_mA", r->Load2_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur2/Load3_mA", r->Load3_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur2/Load4_mA", r->Load4_mA);
+	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(10);
+	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V);     delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);   delay(10);
+	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);   delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(10);
+	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V);   delay(10);
+	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA);     delay(10);
+	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA);     delay(10);
+	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);     delay(10);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
 	
 	SendMQTT("KNet/Haven/Vejr2/Temperatur", r->Temp);      delay(10);
 	SendMQTT("KNet/Haven/Vejr2/Fugtighed", r->Humid);      delay(10);

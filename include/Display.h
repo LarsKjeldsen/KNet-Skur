@@ -20,7 +20,6 @@ void Display_Weather(Reading *);
 void ControlBacklight(bool);
 void Display_Text(const char*, int);
 void Display_Clear();
-void Display_Status();
-
+void Display_Status(Reading *);
 #endif
 

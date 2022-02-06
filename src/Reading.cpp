@@ -19,7 +19,7 @@ Reading::Reading()
 	int c = 0;
 
 	Serial.println("Starting BME");
-	while ((!bme.begin(0x76, &Wire1)) && (c < 10)) {
+	while ((!bme.begin(0x77, &Wire1)) && (c < 10)) {
 		Serial.println("Could not find BME280 sensor!");
 		delay(1000);
 		c++;                              

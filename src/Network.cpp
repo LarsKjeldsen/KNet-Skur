@@ -8,7 +8,6 @@ char password[] = PASSWORD;
 
 const char clientId[] = "Skur_V2";
 
-// LSK IPAddress ip(192, 168, 1, 218);
 IPAddress ip(192, 168, 1, 252);
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);

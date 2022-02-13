@@ -77,9 +77,9 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);     delay(10);
 	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
 	
-	SendMQTT("KNet/Haven/Vejr2/Temperatur", r->Temp);      delay(10);
-	SendMQTT("KNet/Haven/Vejr2/Fugtighed", r->Humid);      delay(10);
-	SendMQTT("KNet/Haven/Vejr2/Lufttryk", r->Press);       delay(10);
+	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);      delay(10);
+	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);      delay(10);
+	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);       delay(10);
 
 if (r->Vandstand_mm != 0) SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
 

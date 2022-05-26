@@ -37,8 +37,8 @@ void WiFi_Setup()
 		if (i++ >= 50)
 			ESP.restart();
 	}
-	Serial.print("WiFi connected IP address: ");
-	Serial.println(WiFi.localIP());
+//	Serial.print("WiFi connected IP address: ");
+//	Serial.println(WiFi.localIP());
 }
 
 

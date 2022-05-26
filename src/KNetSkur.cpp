@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <WiFiClientSecure.h>
 #include <ssl_client.h>
 #include <HTTPClient.h>
@@ -47,6 +48,75 @@ int Next_reading = 0;
 unsigned long millisec = 0;
 
 RTC_NOINIT_ATTR bool Maintanance_mode = false;
+
+
+void Sec_Tick()
+{
+	if (LightCountDownSec > 0)
+		LightCountDownSec--;
+
+	if (SleepCountDownSec > 0)
+		SleepCountDownSec--;
+
+	if (ReadingCountDownSec > 0)
+		ReadingCountDownSec--;
+
+	if (Load4ChargeCountDownSec > 0)
+		Load4ChargeCountDownSec--;
+}
+
+
+void Update_timers()
+{
+	unsigned long m = millis();
+	Count_Sec = m / 1000ul;
+}
+
+void Update_display()
+{
+	Display_Solar(reading);
+	Display_Battery(reading);
+	Display_Load(reading);
+	Display_Status(reading);
+}
+
+void Check_buttoms()
+{
+	if (SW1)
+	{
+		SleepCountDownSec = WAKE_TIME;
+		ControlBacklight(true);
+	}
+
+	if (SW1 && SW5)
+	{
+		ESP.restart();
+	}
+
+	if (SW2)
+	{
+		LightCountDownSec = LIGHT_DELAY_SECOND;
+		ControlBacklight(true);
+		LIGHT1_ON;
+	}
+	if (SW3)
+	{
+		Load4ChargeCountDownSec = MAX_LOAD4_CHARGE_TIME;
+		SleepCountDownSec = MAX_LOAD4_CHARGE_TIME;
+		ControlBacklight(true);
+		RELAY_ON;
+	}
+
+
+	if (SW5)
+	{
+		SleepCountDownSec = 0;
+		Load4ChargeCountDownSec = 0;
+		LightCountDownSec = 3; // Delay 10 to turn off light
+		ControlBacklight(false);
+	}
+}
+
 
 void setup()
 {
@@ -116,7 +186,7 @@ void loop()
 		reading->Get_power();
 		reading->Get_weather();
 
-Serial.printf("T: %.2f -P: %.2f -H: %.2f -L:%d\n", reading->Temp, reading->Press, reading->Humid, reading->Vandstand_mm);
+// Serial.printf("T: %.2f -P: %.2f -H: %.2f -L:%d\n", reading->Temp, reading->Press, reading->Humid, reading->Vandstand_mm);
 		Update_display();
 	}
 
@@ -150,72 +220,5 @@ Serial.printf("T: %.2f -P: %.2f -H: %.2f -L:%d\n", reading->Temp, reading->Press
 }
 
 
-void Sec_Tick()
-{
-	if (LightCountDownSec > 0)
-		LightCountDownSec--;
 
-	if (SleepCountDownSec > 0)
-		SleepCountDownSec--;
-
-	if (ReadingCountDownSec > 0)
-		ReadingCountDownSec--;
-
-	if (Load4ChargeCountDownSec > 0)
-		Load4ChargeCountDownSec--;
-
-}
-
-
-
-void Update_timers()
-{
-	unsigned long m = millis();
-	Count_Sec = m / 1000ul;
-}
-
-void Update_display()
-{
-	Display_Solar(reading);
-	Display_Battery(reading);
-	Display_Load(reading);
-	Display_Status(reading);
-}
-
-void Check_buttoms()
-{
-	if (SW1)
-	{
-		SleepCountDownSec = WAKE_TIME;
-		ControlBacklight(true);
-	}
-
-	if (SW1 && SW5)
-	{
-		ESP.restart();
-	}
-
-	if (SW2)
-	{
-		LightCountDownSec = LIGHT_DELAY_SECOND;
-		ControlBacklight(true);
-		LIGHT1_ON;
-	}
-	if (SW3)
-	{
-		Load4ChargeCountDownSec = MAX_LOAD4_CHARGE_TIME;
-		SleepCountDownSec = MAX_LOAD4_CHARGE_TIME;
-		ControlBacklight(true);
-		RELAY_ON;
-	}
-
-
-	if (SW5)
-	{
-		SleepCountDownSec = 0;
-		Load4ChargeCountDownSec = 0;
-		LightCountDownSec = 3; // Delay 10 to turn off light
-		ControlBacklight(false);
-	}
-}
 

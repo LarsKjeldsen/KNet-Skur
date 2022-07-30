@@ -11,6 +11,12 @@ extern int32_t ReadingCountDownSec;
 extern int32_t SleepCountDownSec;
 extern int32_t Load4ChargeCountDownSec;
 
+extern bool Touch1;
+extern bool Touch2;
+extern bool Touch3;
+extern bool Touch4;
+extern bool Touch5;
+
 extern int Count_Sec;
 
 #define SENCE_READINGS 10
@@ -56,6 +62,10 @@ extern int Count_Sec;
 
 
 void HW_setup();
-void ICACHE_RAM_ATTR TouchCallback();
+void ICACHE_RAM_ATTR TouchCallback1();
+void ICACHE_RAM_ATTR TouchCallback2();
+void ICACHE_RAM_ATTR TouchCallback3();
+void ICACHE_RAM_ATTR TouchCallback4();
+void ICACHE_RAM_ATTR TouchCallback5();
 int ReadTouch(uint8_t TouchPad);
 #endif

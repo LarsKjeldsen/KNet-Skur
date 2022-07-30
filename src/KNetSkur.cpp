@@ -36,6 +36,7 @@
 #include "Network.h"
 #include "Display.h"
 #include "Watering.h"
+#include <EEPROM.h>
 
 Reading* reading;
 
@@ -66,6 +67,34 @@ void Sec_Tick()
 }
 
 
+void CheckForError()
+{
+	String st;
+	char s[EEPROM_SIZE+1];
+
+	EEPROM.begin(EEPROM_SIZE);
+
+	uint8_t Error = EEPROM.read(0);
+
+	Serial.print("CheckForError # char : "); Serial.println(Error);
+	
+	if (Error != 0)   // We have a message in Flash
+		if (Error < EEPROM_SIZE)  // Check for garbage in Flash
+		{
+			int i;
+			for (i = 0; i<Error; i++)
+				st += (char)EEPROM.read(i+1);
+		}
+
+Serial.print("Len = "); Serial.println(Error);
+Serial.print("Txt = "); Serial.println(st);
+
+	SendMQTT("KNet/Debug/KNet_Skur", (char *)st.c_str());
+	EEPROM.write(0,0);  // Clear error;
+	EEPROM.commit();
+}
+
+
 void Update_timers()
 {
 	unsigned long m = millis();
@@ -82,10 +111,11 @@ void Update_display()
 
 void Check_buttoms()
 {
-	if (SW1)
+	if (Touch1)
 	{
 		SleepCountDownSec = WAKE_TIME;
 		ControlBacklight(true);
+		Touch1 = false;
 	}
 
 	if (SW1 && SW5)
@@ -93,27 +123,30 @@ void Check_buttoms()
 		ESP.restart();
 	}
 
-	if (SW2)
+	if (Touch2)
 	{
 		LightCountDownSec = LIGHT_DELAY_SECOND;
 		ControlBacklight(true);
 		LIGHT1_ON;
+		Touch2 = false;
 	}
-	if (SW3)
+	if (Touch3)
 	{
 		Load4ChargeCountDownSec = MAX_LOAD4_CHARGE_TIME;
 		SleepCountDownSec = MAX_LOAD4_CHARGE_TIME;
 		ControlBacklight(true);
 		RELAY_ON;
+		Touch3 = false;
 	}
 
 
-	if (SW5)
+	if (Touch5)
 	{
 		SleepCountDownSec = 0;
 		Load4ChargeCountDownSec = 0;
 		LightCountDownSec = 3; // Delay 10 to turn off light
 		ControlBacklight(false);
+		Touch5 = false;
 	}
 }
 
@@ -133,6 +166,8 @@ void setup()
 	OTA_Setup();
 	Display_Text("Starter MQTT", 3);
 	MQTT_Initial_setup();
+
+	CheckForError();
 
 	reading = new Reading();
 
@@ -155,11 +190,11 @@ void setup()
 	ControlBacklight(true);
 
 	// Setup interrupt on Touch Pad 3 (GPIO15)
-	touchAttachInterrupt(TOUCH1_Pin, TouchCallback, TOUCH_TRESHOLD);
-	touchAttachInterrupt(TOUCH2_Pin, TouchCallback, TOUCH_TRESHOLD);
-	touchAttachInterrupt(TOUCH3_Pin, TouchCallback, TOUCH_TRESHOLD);
-	touchAttachInterrupt(TOUCH4_Pin, TouchCallback, TOUCH_TRESHOLD);
-	touchAttachInterrupt(TOUCH5_Pin, TouchCallback, TOUCH_TRESHOLD);
+	touchAttachInterrupt(TOUCH1_Pin, TouchCallback1, TOUCH_TRESHOLD);
+	touchAttachInterrupt(TOUCH2_Pin, TouchCallback2, TOUCH_TRESHOLD);
+	touchAttachInterrupt(TOUCH3_Pin, TouchCallback3, TOUCH_TRESHOLD);
+	touchAttachInterrupt(TOUCH4_Pin, TouchCallback4, TOUCH_TRESHOLD);
+	touchAttachInterrupt(TOUCH5_Pin, TouchCallback5, TOUCH_TRESHOLD);
 
 	//Configure Touchpad as wakeup source
 	esp_sleep_enable_touchpad_wakeup();
@@ -211,14 +246,11 @@ void loop()
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
-		Serial.println("Going to sleep");
+//		Serial.println("Going to sleep");
 		esp_light_sleep_start();
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
 	
 	Check_buttoms();
 }
-
-
-
 

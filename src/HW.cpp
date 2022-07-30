@@ -14,6 +14,11 @@ uint16_t millivolt[SENCE_READINGS];
 int Count_Sec = 0;
 
 int hit = 0;
+bool Touch1 = false;
+bool Touch2 = false;
+bool Touch3 = false;
+bool Touch4 = false;
+bool Touch5 = false;
 
 void HW_setup()
 {
@@ -31,7 +36,29 @@ void HW_setup()
 
 
 // When Touch interrupt is triggeret
-void ICACHE_RAM_ATTR TouchCallback()
+void ICACHE_RAM_ATTR TouchCallback1()
 {
+    Serial.println("Touch1");
+    Touch1 = true;
+}
+void ICACHE_RAM_ATTR TouchCallback2()
+{
+    Serial.println("Touch2");
+    Touch2 = true;
+}
+void ICACHE_RAM_ATTR TouchCallback3()
+{
+    Touch3 = true;
+    Serial.println("Touch3");
+}
+void ICACHE_RAM_ATTR TouchCallback4()
+{
+    Touch4 = true;
+    Serial.println("Touch4");
+}
+void ICACHE_RAM_ATTR TouchCallback5()
+{
+    Touch5 = true;
+    Serial.println("Touch5");
 }
 

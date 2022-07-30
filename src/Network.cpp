@@ -2,6 +2,7 @@
 #include "Reading.h"
 #include "WIFI-Secret.h"
 #include <ArduinoOTA.h>
+#include <EEPROM.h>
 
 char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
@@ -9,6 +10,7 @@ char password[] = PASSWORD;
 const char clientId[] = "Skur_V2";
 
 IPAddress ip(192, 168, 1, 252);
+//IPAddress ip(192, 168, 1, 120); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 
@@ -35,10 +37,8 @@ void WiFi_Setup()
 		delay(250);
 		Serial.print('.');
 		if (i++ >= 50)
-			ESP.restart();
+			My_Esp_Restart("WiFI Setup : " + WiFi.status());
 	}
-//	Serial.print("WiFi connected IP address: ");
-//	Serial.println(WiFi.localIP());
 }
 
 
@@ -54,7 +54,7 @@ void WIFI_disconnect()
 		delay(100);
 		MQTTclient.loop();
 		if (i++ >= 20)
-			ESP.restart();
+			My_Esp_Restart("WiFI Disco : " + MQTTclient.state());
 	}
 	delay(10);
 
@@ -81,7 +81,8 @@ void Send_reading(Reading* r)
 	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);      delay(10);
 	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);       delay(10);
 
-if (r->Vandstand_mm != 0) SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
+	if (r->Vandstand_mm != 0) 
+		SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
 
 	delay(1000);
 
@@ -108,18 +109,17 @@ void MQTT_Initial_setup()
 		Serial.println("Connect MQTT");
 		MQTTclient.connect(clientId);
 	}
-	while (!MQTTclient.connected())
+
+	do 
 	{
 		Serial.print("Attempting MQTT connection... : ");
 		// Attempt to connect
 		MQTTclient.connect(clientId);
 		delay(250);
 		Serial.println("ERROR");
-		if (i++ >= 10) {
-			Serial.println("Unable to connect to MQTT, ESP is restarting.");  Serial.flush();
-			ESP.restart();
-		}
-	}
+		if (i++ >= 10)
+			My_Esp_Restart("MQTT connect : " + MQTTclient.connected());
+	} while (!MQTTclient.connected());
 }
 
 
@@ -132,24 +132,22 @@ void MQTT_Setup()
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
 	
-	delay(500);
+	delay(50);
 	if (!MQTTclient.connected()) {
 		Serial.println("Connect MQTT");
 		MQTTclient.connect(clientId);
 	}
 
-	while (!MQTTclient.connected())
+	do 
 	{
 		Serial.print("Attempting MQTT connection... : ");
 		// Attempt to connect
 		MQTTclient.connect(clientId);
 		delay(250);
 		Serial.println("ERROR");
-		if (i++ >= 10) {
-			Serial.println("Unable to connect to MQTT, ESP is restarting.");  Serial.flush();
-			ESP.restart();
-		}
-	}
+		if (i++ >= 10) 
+			My_Esp_Restart("MQTT connect : " + MQTTclient.connected());
+	} while (!MQTTclient.connected());
 }
 
 
@@ -164,7 +162,7 @@ void SendMQTT(const char* Topic, int32_t payload)
 	itoa(payload, s, 10);
 	ret = MQTTclient.publish(Topic, s, false);
 	if (!ret)
-		ESP.restart();
+		My_Esp_Restart("Send MQTT : " + ret);
 }
 
 void SendMQTT(const char* Topic, float payload)
@@ -178,13 +176,26 @@ void SendMQTT(const char* Topic, float payload)
 	dtostrf(payload, 5, 2, s);
 	ret = MQTTclient.publish(Topic, s, false);
 	if (!ret)
-		ESP.restart();
+		My_Esp_Restart("Send MQTT : " + ret);
+}
+
+void SendMQTT(const char* Topic, char *payload)
+{
+	bool ret;
+
+	if (!MQTTclient.connected())
+		MQTT_Setup();
+
+	ret = MQTTclient.publish(Topic, payload, false);
+	if (!ret)
+		My_Esp_Restart("Send MQTT : " + ret);
 }
 
 
 int GetStatusCode()
 {
 	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
+	httpClient.setReuse(false);
 	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwMmEyNmYxZDViMDE0MWIxODhkNWMxZGM0NTk1ZjcxNCIsImlhdCI6MTYxNzM2NzY0MSwiZXhwIjoxOTMyNzI3NjQxfQ.iJ0YQy9E4U9Rwbs9EJMYl1-DIoBHCW6AAB0rL3mAsEw");
 	httpClient.addHeader("Content-Type", "application/json");
 
@@ -249,3 +260,17 @@ void OTA_Setup()
 	Serial.println(WiFi.localIP());
 }
 
+void My_Esp_Restart(String ErrorText)
+{
+	if(ErrorText.length() > EEPROM_SIZE)
+		ErrorText = ErrorText.substring(0, EEPROM_SIZE);
+
+Serial.print("Len = "); Serial.println(ErrorText.length());
+Serial.print("Txt = "); Serial.println(ErrorText);
+
+	EEPROM.write(0, ErrorText.length()); // We have a error message
+	EEPROM.writeString(1, ErrorText);
+	EEPROM.commit();
+	sleep(1);
+	ESP.restart();
+}

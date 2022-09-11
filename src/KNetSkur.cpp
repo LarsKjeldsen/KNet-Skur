@@ -40,7 +40,7 @@
 
 Reading* reading;
 
-#define WAKE_TIME 600 // 10 minute
+#define WAKE_TIME 60 // 10 minute
 #define SEND_READING_INTERVAL 45
 #define LIGHT_DELAY_SECOND 600  // 10 min.
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
@@ -118,10 +118,10 @@ void Check_buttoms()
 		Touch1 = false;
 	}
 
-	if (SW1 && SW5)
-	{
-		ESP.restart();
-	}
+	// if (SW1 && SW5)
+	// {
+	// 	ESP.restart();
+	// }
 
 	if (Touch2)
 	{
@@ -166,8 +166,9 @@ void setup()
 	OTA_Setup();
 	Display_Text("Starter MQTT", 3);
 	MQTT_Initial_setup();
-
+	Display_Text("Cheking for Error", 3);
 	CheckForError();
+	Display_Text("Getting reading", 3);
 
 	reading = new Reading();
 
@@ -246,8 +247,9 @@ void loop()
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
-//		Serial.println("Going to sleep");
+		Serial.println("Going to sleep");
 		esp_light_sleep_start();
+		Serial.println("Back awake");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
 	

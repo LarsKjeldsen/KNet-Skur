@@ -261,4 +261,5 @@ __pycache__/
 *.pyc WIFI-Secret.h 
 
 .pio/
+.vscode/
 WIFI-Secret.h

@@ -10,7 +10,7 @@ char password[] = PASSWORD;
 const char clientId[] = "Skur_V2";
 
 IPAddress ip(192, 168, 1, 252);
-//IPAddress ip(192, 168, 1, 120); //DEBUG
+// IPAddress ip(192, 168, 1, 120); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 
@@ -37,11 +37,12 @@ void WiFi_Setup()
 		delay(250);
 		Serial.print('.');
 		if (i++ >= 50)
-			My_Esp_Restart("WiFI Setup : " + WiFi.status());
+		{
+			i=0;
+			WiFi.begin(ssid, password);
+		}
 	}
 }
-
-
 
 
 void WIFI_disconnect()
@@ -62,6 +63,7 @@ void WIFI_disconnect()
 	WiFi.disconnect(true, false);
 }
 
+
 void Send_reading(Reading* r)
 {
 	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(10);
@@ -79,7 +81,7 @@ void Send_reading(Reading* r)
 	
 	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);      delay(10);
 	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);      delay(10);
-	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);       delay(10);
+	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);      delay(10);
 
 	if (r->Vandstand_mm != 0) 
 		SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
@@ -100,7 +102,7 @@ void MQTT_Initial_setup()
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
 
-	String IP = WiFi.localIP().toString();
+//	String IP = WiFi.localIP().toString();
 
 	MQTTclient.setServer(MQTTServer, 1883);
 	MQTTclient.setSocketTimeout(120);
@@ -110,16 +112,9 @@ void MQTT_Initial_setup()
 		MQTTclient.connect(clientId);
 	}
 
-	do 
-	{
-		Serial.print("Attempting MQTT connection... : ");
-		// Attempt to connect
-		MQTTclient.connect(clientId);
-		delay(250);
-		Serial.println("ERROR");
-		if (i++ >= 10)
-			My_Esp_Restart("MQTT connect : " + MQTTclient.connected());
-	} while (!MQTTclient.connected());
+	delay(250);
+
+	MQTT_Setup();
 }
 
 
@@ -132,22 +127,24 @@ void MQTT_Setup()
 	if (WiFi.status() != WL_CONNECTED)
 		WiFi_Setup();
 	
-	delay(50);
-	if (!MQTTclient.connected()) {
+	if (!MQTTclient.connected()) 
+	{
 		Serial.println("Connect MQTT");
 		MQTTclient.connect(clientId);
-	}
 
-	do 
-	{
-		Serial.print("Attempting MQTT connection... : ");
-		// Attempt to connect
-		MQTTclient.connect(clientId);
-		delay(250);
-		Serial.println("ERROR");
-		if (i++ >= 10) 
-			My_Esp_Restart("MQTT connect : " + MQTTclient.connected());
-	} while (!MQTTclient.connected());
+		while (!MQTTclient.connected())
+		{
+			Serial.print("Attempting MQTT connection... : ");
+			// Attempt to connect
+			if (WiFi.status() != WL_CONNECTED)
+				WiFi_Setup();
+			MQTTclient.connect(clientId);
+			delay(250);
+			Serial.println("ERROR");
+			if (i++ >= 10) 
+				My_Esp_Restart("MQTT connect : " + (int)MQTTclient.connected());
+		}
+	}
 }
 
 
@@ -262,15 +259,9 @@ void OTA_Setup()
 
 void My_Esp_Restart(String ErrorText)
 {
-	if(ErrorText.length() > EEPROM_SIZE)
-		ErrorText = ErrorText.substring(0, EEPROM_SIZE);
-
-Serial.print("Len = "); Serial.println(ErrorText.length());
-Serial.print("Txt = "); Serial.println(ErrorText);
-
-	EEPROM.write(0, ErrorText.length()); // We have a error message
+	EEPROM.write(0, max((int)ErrorText.length(), EEPROM_SIZE-2)); // need room for size and trailing zero
 	EEPROM.writeString(1, ErrorText);
 	EEPROM.commit();
-	sleep(1);
+	sleep(1000);
 	ESP.restart();
 }

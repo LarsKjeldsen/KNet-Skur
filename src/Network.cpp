@@ -23,25 +23,15 @@ HTTPClient httpClient;
 
 
 
-void WiFi_Setup()
+bool WiFi_Setup()
 {
 	Serial.print("WIFI Setup");
 
-	int i = 0;
 	WiFi.mode(WIFI_STA);
-	WiFi.persistent(false);     // <-- prevents flash wearing?
 
 	WiFi.config(ip, gw, mask);
 	WiFi.begin(ssid, password);
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(250);
-		Serial.print('.');
-		if (i++ >= 50)
-		{
-			i=0;
-			WiFi.begin(ssid, password);
-		}
-	}
+	return (WiFi.status() == wl_status_t::WL_CONNECTED);
 }
 
 
@@ -49,23 +39,23 @@ void WIFI_disconnect()
 {
 	int i = 0;
 
-	MQTTclient.disconnect();
+//	MQTTclient.disconnect();
 
-	while (MQTTclient.state() != -1) {
-		delay(100);
-		MQTTclient.loop();
-		if (i++ >= 20)
-			My_Esp_Restart("WiFI Disco : " + MQTTclient.state());
-	}
-	delay(10);
-
-	WiFi.mode(WIFI_OFF);
-	WiFi.disconnect(true, false);
+//	WiFi.mode(WIFI_OFF);
+//	WiFi.disconnect(true, false);
 }
 
 
-void Send_reading(Reading* r)
+bool Send_reading(Reading* r)
 {
+	if (WiFi.status() != WL_CONNECTED)
+		if (! WiFi_Setup())
+			return false;
+
+	if (!MQTTclient.connected())
+		if ( ! MQTT_Setup())
+			return false;
+
 	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(10);
@@ -91,6 +81,8 @@ void Send_reading(Reading* r)
 	Maintanance_mode = GetStatusCode();
 	if (!Maintanance_mode)
 		WIFI_disconnect();
+
+	return true;
 }
 
 void MQTT_Initial_setup()
@@ -118,74 +110,48 @@ void MQTT_Initial_setup()
 }
 
 
-void MQTT_Setup()
+bool MQTT_Setup()
 {
 	int i = 0;
 
 	Serial.println("MQTT_Setup");
 
-	if (WiFi.status() != WL_CONNECTED)
-		WiFi_Setup();
-	
 	if (!MQTTclient.connected()) 
 	{
 		Serial.println("Connect MQTT");
 		MQTTclient.connect(clientId);
 
-		while (!MQTTclient.connected())
-		{
-			Serial.print("Attempting MQTT connection... : ");
-			// Attempt to connect
-			if (WiFi.status() != WL_CONNECTED)
-				WiFi_Setup();
-			MQTTclient.connect(clientId);
-			delay(250);
-			Serial.println("ERROR");
-			if (i++ >= 10) 
-				My_Esp_Restart("MQTT connect : " + (int)MQTTclient.connected());
-		}
+		return MQTTclient.connected();
 	}
 }
 
 
-void SendMQTT(const char* Topic, int32_t payload)
+bool SendMQTT(const char* Topic, int32_t payload)
 {
 	bool ret;
 
-	if (!MQTTclient.connected())
-		MQTT_Setup();
-	
 	char s[20];
 	itoa(payload, s, 10);
 	ret = MQTTclient.publish(Topic, s, false);
-	if (!ret)
-		My_Esp_Restart("Send MQTT : " + ret);
+	return (ret);
 }
 
-void SendMQTT(const char* Topic, float payload)
+bool SendMQTT(const char* Topic, float payload)
 {
 	bool ret;
-
-	if (!MQTTclient.connected())
-		MQTT_Setup();
 
 	char s[30];
 	dtostrf(payload, 5, 2, s);
 	ret = MQTTclient.publish(Topic, s, false);
-	if (!ret)
-		My_Esp_Restart("Send MQTT : " + ret);
+	return (ret);
 }
 
-void SendMQTT(const char* Topic, char *payload)
+bool SendMQTT(const char* Topic, char *payload)
 {
 	bool ret;
 
-	if (!MQTTclient.connected())
-		MQTT_Setup();
-
 	ret = MQTTclient.publish(Topic, payload, false);
-	if (!ret)
-		My_Esp_Restart("Send MQTT : " + ret);
+	return (ret);
 }
 
 

@@ -46,6 +46,7 @@ Reading* reading;
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
 
 int Next_reading = 0;
+int ErrorCount;
 unsigned long millisec = 0;
 
 RTC_NOINIT_ATTR bool Maintanance_mode = false;
@@ -144,7 +145,7 @@ void Check_buttoms()
 	{
 		SleepCountDownSec = 0;
 		Load4ChargeCountDownSec = 0;
-		LightCountDownSec = 3; // Delay 10 to turn off light
+		LightCountDownSec = 3; // Delay 3 to turn off light
 		ControlBacklight(false);
 		Touch5 = false;
 	}
@@ -228,8 +229,13 @@ void loop()
 
 	if (ReadingCountDownSec <= 0)
 	{
+		if (! Send_reading(reading))
+		{
+			ErrorCount++;
+			ReadingCountDownSec = 0;
+		}
+		else
 		ReadingCountDownSec = SEND_READING_INTERVAL;
-		Send_reading(reading);
 	}
 
 	if (LightCountDownSec <= 0)
@@ -246,10 +252,11 @@ void loop()
 		Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
-		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
-		Serial.println("Going to sleep");
+		esp_sleep_enable_timer_wakeup(3UL * 1000000UL);
+		// Serial.println("Going to sleep");
+		esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
 		esp_light_sleep_start();
-		Serial.println("Back awake");
+		// Serial.println("Back awake");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
 	

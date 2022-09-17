@@ -14,17 +14,17 @@
 
 extern RTC_NOINIT_ATTR bool Maintanance_mode;
 
-void WiFi_Setup();
-void MQTT_Setup();
+bool WiFi_Setup();
+bool MQTT_Setup();
 void OTA_Setup();
 void MQTT_Initial_setup();
 
-void SendMQTT(const char *Topic, char *payload);
-void SendMQTT(const char *Topic, int32_t payload);
-void SendMQTT(const char *Topic, float payload);
+bool SendMQTT(const char *Topic, char *payload);
+bool SendMQTT(const char *Topic, int32_t payload);
+bool SendMQTT(const char *Topic, float payload);
 void My_Esp_Restart(String ErrorText);
 
-void Send_reading(Reading *);
+bool Send_reading(Reading *);
 int GetStatusCode();
 
 #endif

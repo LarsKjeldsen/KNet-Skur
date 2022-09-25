@@ -22,40 +22,85 @@ PubSubClient MQTTclient(ethClient);
 HTTPClient httpClient;
 
 
-
-bool WiFi_Setup()
+void WiFi_disconnect()
 {
-	Serial.print("WIFI Setup");
+	WiFi.disconnect(true);  // Disconnect from the network
+    WiFi.mode(WIFI_OFF); 	// Turn off WiFi modem
+}
 
-	WiFi.mode(WIFI_STA);
+bool WiFi_Setup(int ErrorCount)
+{ 
+	if (WiFi.status() == wl_status_t::WL_CONNECTED)
+		return true;
 
-	WiFi.config(ip, gw, mask);
-	WiFi.begin(ssid, password);
+	if (ErrorCount < 5)
+	{
+		Serial.print(" 1 ");
+
+		WiFi.mode(WIFI_STA);
+		WiFi.config(ip, gw, mask);
+		WiFi.begin(ssid, password);
+		delay(500);
+		return (WiFi.status() == wl_status_t::WL_CONNECTED);
+	}
+
+	if ((ErrorCount > 5) && (WiFi.status() != wl_status_t::WL_CONNECTED))
+	{
+		Serial.print(" 5 ");
+		WiFi.disconnect();
+
+		WiFi.mode(WIFI_STA);
+		WiFi.config(ip, gw, mask);
+		WiFi.begin(ssid, password);
+		delay(500);
+		return (WiFi.status() == wl_status_t::WL_CONNECTED);
+	}
+
 	return (WiFi.status() == wl_status_t::WL_CONNECTED);
 }
 
 
-void WIFI_disconnect()
+bool MQTT_Setup()
 {
-	int i = 0;
+	if (!MQTTclient.connected()) 
+	{
+		Serial.print(" , ");
+		MQTTclient.setServer(MQTTServer, 1883);
+		MQTTclient.setSocketTimeout(120);
+		MQTTclient.setKeepAlive(120);
+		MQTTclient.connect(clientId);
+		delay(250);
+	}
 
-//	MQTTclient.disconnect();
-
-//	WiFi.mode(WIFI_OFF);
-//	WiFi.disconnect(true, false);
+	if (MQTTclient.connected())
+		return true;
+	else
+		Serial.println('M');
+	return false;
 }
 
 
-bool Send_reading(Reading* r)
+bool MQTT_Loop()
+{
+	return MQTTclient.loop();
+}
+
+bool Send_reading(Reading* r, int ErrorCount)
 {
 	if (WiFi.status() != WL_CONNECTED)
-		if (! WiFi_Setup())
+		if (! WiFi_Setup(ErrorCount))
+		{
+			Serial.println("WiFi not connected");
 			return false;
+		}
+//	delay(500);
 
 	if (!MQTTclient.connected())
 		if ( ! MQTT_Setup())
+		{
+			Serial.println("MQTT not connected");
 			return false;
-
+		}
 	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(10);
 	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(10);
@@ -76,55 +121,12 @@ bool Send_reading(Reading* r)
 	if (r->Vandstand_mm != 0) 
 		SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
 
-	delay(1000);
+	delay(2000);
 
 	Maintanance_mode = GetStatusCode();
-	if (!Maintanance_mode)
-		WIFI_disconnect();
 
 	return true;
 }
-
-void MQTT_Initial_setup()
-{
-	int i = 0;
-
-	Serial.println("MQTT_Setup");
-
-	if (WiFi.status() != WL_CONNECTED)
-		WiFi_Setup();
-
-//	String IP = WiFi.localIP().toString();
-
-	MQTTclient.setServer(MQTTServer, 1883);
-	MQTTclient.setSocketTimeout(120);
-	MQTTclient.setKeepAlive(120);
-	if (!MQTTclient.connected()) {
-		Serial.println("Connect MQTT");
-		MQTTclient.connect(clientId);
-	}
-
-	delay(250);
-
-	MQTT_Setup();
-}
-
-
-bool MQTT_Setup()
-{
-	int i = 0;
-
-	Serial.println("MQTT_Setup");
-
-	if (!MQTTclient.connected()) 
-	{
-		Serial.println("Connect MQTT");
-		MQTTclient.connect(clientId);
-
-		return MQTTclient.connected();
-	}
-}
-
 
 bool SendMQTT(const char* Topic, int32_t payload)
 {
@@ -228,6 +230,6 @@ void My_Esp_Restart(String ErrorText)
 	EEPROM.write(0, max((int)ErrorText.length(), EEPROM_SIZE-2)); // need room for size and trailing zero
 	EEPROM.writeString(1, ErrorText);
 	EEPROM.commit();
-	sleep(1000);
+	sleep(1);
 	ESP.restart();
 }

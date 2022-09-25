@@ -7,9 +7,10 @@ long Timer_counter = 0;
 
 int32_t LightCountDownSec = 0;
 int32_t ReadingCountDownSec = 0;
-int32_t SleepCountDownSec = 0;
+int32_t DisplayCountDownSec = 0;
 int32_t Load4ChargeCountDownSec = 0;
 uint16_t millivolt[SENCE_READINGS];
+int8_t DisplayStatus = 0;
 
 int Count_Sec = 0;
 

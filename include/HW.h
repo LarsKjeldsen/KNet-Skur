@@ -8,8 +8,10 @@
 
 extern int32_t LightCountDownSec;
 extern int32_t ReadingCountDownSec;
-extern int32_t SleepCountDownSec;
+extern int32_t DisplayCountDownSec;
 extern int32_t Load4ChargeCountDownSec;
+extern int8_t DisplayStatus;
+extern int ErrorCount;
 
 extern bool Touch1;
 extern bool Touch2;

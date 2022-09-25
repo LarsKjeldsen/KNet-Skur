@@ -43,8 +43,8 @@ Reading::Reading()
 	for (int i = 0; i < NUM_WATER_READINGS; i++)
 		WaterLevel[i] = 0;
 
+	// Start serial2 for the Water level meassurement
 	Serial2.begin(9600, SERIAL_8N1, GPIO_NUM_16, GPIO_NUM_17, false);	
-//	Dist_setup();
 
 	Serial.println("Completed Startup");
 }

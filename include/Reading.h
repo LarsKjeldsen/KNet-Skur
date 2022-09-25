@@ -4,11 +4,12 @@
 #define _READING_h
 
 #include "Arduino.h"
-#include <Adafruit_Sensor.h>
+#include <Wire.h>
+// #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <Adafruit_INA219.h>
 #include "INA3221.h"
-#include <Wire.h>
+
 
 
 class Reading

@@ -6,11 +6,11 @@
 #include <Update.h>
 #include <HttpsOTAUpdate.h>
 #include <ArduinoOTA.h>
-#include <Adafruit_SPIDevice.h>
-#include <Adafruit_I2CRegister.h>
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_BusIO_Register.h>
-#include <Adafruit_Sensor.h>
+// #include <Adafruit_SPIDevice.h>
+// #include <Adafruit_I2CRegister.h>
+// #include <Adafruit_I2CDevice.h>
+// #include <Adafruit_BusIO_Register.h>
+// #include <Adafruit_Sensor.h>
 #include <AsyncUDP.h>
 #include <WiFi.h>
 #include <WiFiType.h>
@@ -24,13 +24,13 @@
 #include <WiFiAP.h>
 #include <ETH.h>
 #include <SimpleBLE.h>
+#include <wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
 #include <Adafruit_INA219.h>
 #include "INA3221.h"
 #include <PubSubClient.h>
 #include <Ticker.h>
-#include <Wire.h>
 #include "HW.h"
 #include "Reading.h"
 #include "Network.h"
@@ -40,7 +40,7 @@
 
 Reading* reading;
 
-#define WAKE_TIME 60 // 10 minute
+#define DISPLAY_ON_TIME 60 // 10 minute
 #define SEND_READING_INTERVAL 45
 #define LIGHT_DELAY_SECOND 600  // 10 min.
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
@@ -57,8 +57,8 @@ void Sec_Tick()
 	if (LightCountDownSec > 0)
 		LightCountDownSec--;
 
-	if (SleepCountDownSec > 0)
-		SleepCountDownSec--;
+	if (DisplayCountDownSec > 0)
+		DisplayCountDownSec--;
 
 	if (ReadingCountDownSec > 0)
 		ReadingCountDownSec--;
@@ -77,8 +77,6 @@ void CheckForError()
 
 	uint8_t Error = EEPROM.read(0);
 
-	Serial.print("CheckForError # char : "); Serial.println(Error);
-	
 	if (Error != 0)   // We have a message in Flash
 		if (Error < EEPROM_SIZE)  // Check for garbage in Flash
 		{
@@ -86,9 +84,6 @@ void CheckForError()
 			for (i = 0; i<Error; i++)
 				st += (char)EEPROM.read(i+1);
 		}
-
-Serial.print("Len = "); Serial.println(Error);
-Serial.print("Txt = "); Serial.println(st);
 
 	SendMQTT("KNet/Debug/KNet_Skur", (char *)st.c_str());
 	EEPROM.write(0,0);  // Clear error;
@@ -114,18 +109,14 @@ void Check_buttoms()
 {
 	if (Touch1)
 	{
-		SleepCountDownSec = WAKE_TIME;
+		DisplayCountDownSec = DISPLAY_ON_TIME;
 		ControlBacklight(true);
 		Touch1 = false;
 	}
 
-	// if (SW1 && SW5)
-	// {
-	// 	ESP.restart();
-	// }
-
 	if (Touch2)
 	{
+		DisplayCountDownSec = DISPLAY_ON_TIME;
 		LightCountDownSec = LIGHT_DELAY_SECOND;
 		ControlBacklight(true);
 		LIGHT1_ON;
@@ -133,20 +124,28 @@ void Check_buttoms()
 	}
 	if (Touch3)
 	{
+		DisplayCountDownSec = DISPLAY_ON_TIME;
 		Load4ChargeCountDownSec = MAX_LOAD4_CHARGE_TIME;
-		SleepCountDownSec = MAX_LOAD4_CHARGE_TIME;
+		DisplayCountDownSec = DISPLAY_ON_TIME;
 		ControlBacklight(true);
 		RELAY_ON;
 		Touch3 = false;
 	}
 
+	if (Touch4)
+	{
+		DisplayCountDownSec = DISPLAY_ON_TIME;
+		DisplayStatus++;
+		if (DisplayStatus > 3)
+			DisplayStatus = 0;
+		Touch4 = false;
+	}
 
 	if (Touch5)
 	{
-		SleepCountDownSec = 0;
+		DisplayCountDownSec = 0;
 		Load4ChargeCountDownSec = 0;
 		LightCountDownSec = 3; // Delay 3 to turn off light
-		ControlBacklight(false);
 		Touch5 = false;
 	}
 }
@@ -163,10 +162,12 @@ void setup()
 	Display_Text("Starter BME ", 3);
 	HW_setup();
 	Display_Text("Starter WiFi", 3);
-	WiFi_Setup();
+	esp_bt_controller_disable();
+	WiFi_Setup();  // Need to intialize
+	delay(500);
 	OTA_Setup();
 	Display_Text("Starter MQTT", 3);
-	MQTT_Initial_setup();
+	MQTT_Setup();
 	Display_Text("Cheking for Error", 3);
 	CheckForError();
 	Display_Text("Getting reading", 3);
@@ -176,7 +177,7 @@ void setup()
 	reading->Get_WaterReading();
 	reading->Get_power();
 	reading->Get_weather();
-
+	Display_Text("Sending reading", 3);
 	Send_reading(reading);
 
 	//	Second_LightCountdown = 120;
@@ -184,12 +185,10 @@ void setup()
 	Display_Battery(reading);
 	Display_Load(reading);
 
-	ControlBacklight(0); // turn off backlight
+	ControlBacklight(false); // turn off backlight
 
-	SleepCountDownSec =60;  // Start with 1 min
+	DisplayCountDownSec = 5;  // Start with 1 min
 	LightCountDownSec = 5;  // Start with 1 min
-
-	ControlBacklight(true);
 
 	// Setup interrupt on Touch Pad 3 (GPIO15)
 	touchAttachInterrupt(TOUCH1_Pin, TouchCallback1, TOUCH_TRESHOLD);
@@ -199,6 +198,7 @@ void setup()
 	touchAttachInterrupt(TOUCH5_Pin, TouchCallback5, TOUCH_TRESHOLD);
 
 	//Configure Touchpad as wakeup source
+	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
 	esp_sleep_enable_touchpad_wakeup();
 }
 
@@ -212,31 +212,39 @@ void loop()
 	if (Maintanance_mode)
 		ArduinoOTA.handle();
 
+	MQTT_Loop();
+
 	if (millisec < m)
 	{
 		do	{  // Make sure we don't skip a sec.
 			millisec += 1000;
 			Sec_Tick();
-		}
-		while (millisec < m);
+		} while (millisec < m);
+
 		reading->Get_WaterReading();
 		reading->Get_power();
 		reading->Get_weather();
 
-// Serial.printf("T: %.2f -P: %.2f -H: %.2f -L:%d\n", reading->Temp, reading->Press, reading->Humid, reading->Vandstand_mm);
 		Update_display();
 	}
 
 	if (ReadingCountDownSec <= 0)
 	{
-		if (! Send_reading(reading))
+		if (Send_reading(reading, ErrorCount))
 		{
-			ErrorCount++;
-			ReadingCountDownSec = 0;
+			Serial.println("Sending reading");
+		
+			ReadingCountDownSec = SEND_READING_INTERVAL;
+			ErrorCount = 0;
+			WiFi_disconnect();
 		}
 		else
-		ReadingCountDownSec = SEND_READING_INTERVAL;
+			ErrorCount++;
+
+		if (ErrorCount > 20)
+			My_Esp_Restart("ErrorCount to high");
 	}
+
 
 	if (LightCountDownSec <= 0)
 	{
@@ -246,19 +254,24 @@ void loop()
 	if (Load4ChargeCountDownSec <= 0)
 		RELAY_OFF;
 
-	if (!Maintanance_mode && SleepCountDownSec <= 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0)   // Only sleep if lights off
-	{
+	if (DisplayCountDownSec <= 0)
 		ControlBacklight(false);
-		Display_sleeping();
+
+	Serial.printf("ReadingCountDownSec: %d, Maint: %d, ErrorCount: %d, LightCountDownSec: %d, Load4ChargeCountDownSec: %d\n",ReadingCountDownSec, Maintanance_mode, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
+	Serial.flush();
+	if (!Maintanance_mode && ErrorCount == 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0)   // Only sleep if lights off
+	{
+		// Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
-		esp_sleep_enable_timer_wakeup(3UL * 1000000UL);
-		// Serial.println("Going to sleep");
-		esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
+		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
+		Serial.println("Going to sleep");
 		esp_light_sleep_start();
-		// Serial.println("Back awake");
-		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
+		Serial.println("Back awake");
+//		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
+	else
+		delay(1000);
 	
 	Check_buttoms();
 }

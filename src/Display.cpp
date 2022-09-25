@@ -1,12 +1,16 @@
 #include "Display.h"
 #include "HW.h"
 
-LiquidCrystal_I2C lcd(0x3F, 40, 4);
+#define BACKLIGHT_PIN 4
 
+LiquidCrystal_I2C lcd(0x3F, 40, 4);
 
 void Display_Setup()
 {
-	lcd.init();
+	pinMode ( BACKLIGHT_PIN, OUTPUT );
+	digitalWrite ( BACKLIGHT_PIN, HIGH );
+  
+  	lcd.begin(40,4);         
 }
 
 void Display_Text(const char * text, int line)
@@ -87,7 +91,25 @@ void Display_Status(Reading * r)
 	char d[DISPLAYLEN * 2];  //  Just to be sure
 
 	lcd.setCursor(0, 3);
-	sprintf(d, "%dS %dC/%dP/%d%%", SleepCountDownSec, (int)r->Temp, (int)r->Press, (int)r->Humid);
+	switch (DisplayStatus)
+	{
+	case 0:
+		sprintf(d, "Vejr : %dC/%dP/%d%%", (int)r->Temp, (int)r->Press, (int)r->Humid);
+		break;
+
+	case 1:
+		sprintf(d, "%d %d %d %d", DisplayCountDownSec, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
+		break;
+	
+	case 2:
+		sprintf(d, "Vejr : %dC/%dP/%d%%", DisplayCountDownSec, (int)r->Temp, (int)r->Press, (int)r->Humid);
+		break;
+
+	case 3:
+		sprintf(d, "SC:%d EC:%d LC:%d L4:%d", DisplayCountDownSec, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
+		break;
+	}
+
 	for (int i=strlen(d); i<DISPLAYLEN; i++)
 		d[i] = ' ';
 	d[DISPLAYLEN] = '\0';

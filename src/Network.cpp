@@ -159,9 +159,9 @@ bool SendMQTT(const char* Topic, char *payload)
 
 int GetStatusCode()
 {
-	httpClient.begin("http://192.168.1.21:8123/api/states/input_boolean.skur_debug");
+	httpClient.begin("http://192.168.1.20:8123/api/states/input_boolean.skur_debug");
 	httpClient.setReuse(false);
-	httpClient.addHeader("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwMmEyNmYxZDViMDE0MWIxODhkNWMxZGM0NTk1ZjcxNCIsImlhdCI6MTYxNzM2NzY0MSwiZXhwIjoxOTMyNzI3NjQxfQ.iJ0YQy9E4U9Rwbs9EJMYl1-DIoBHCW6AAB0rL3mAsEw");
+	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2YWJiZDM4Yzc2YTk0ZTQ4YTg3YTlkM2FkOGFkNDVkZiIsImlhdCI6MTY2NzY0NTY4MywiZXhwIjoxOTgzMDA1NjgzfQ.-QBAQvT2DCn8UPiw7oTD_iGXMnExdsBvFh1-X8DBmJo");
 	httpClient.addHeader("Content-Type", "application/json");
 
 	int httpCode = httpClient.GET();
@@ -175,6 +175,7 @@ int GetStatusCode()
 	if (httpCode == 200) { //Check for the returning code
 
 		String payload = httpClient.getString();
+//		Serial.println(payload);
 
 		cJSON* root = cJSON_Parse(payload.c_str());
 		if (root == NULL) {

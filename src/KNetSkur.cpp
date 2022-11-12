@@ -257,9 +257,10 @@ void loop()
 	if (DisplayCountDownSec <= 0)
 		ControlBacklight(false);
 
-	Serial.printf("ReadingCountDownSec: %d, Maint: %d, ErrorCount: %d, LightCountDownSec: %d, Load4ChargeCountDownSec: %d\n",ReadingCountDownSec, Maintanance_mode, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
+	if (ErrorCount > 0)	
+		Serial.printf("ReadingCountDownSec: %d, Maint: %d, ErrorCount: %d, LightCountDownSec: %d, Load4ChargeCountDownSec: %d\n",ReadingCountDownSec, Maintanance_mode, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
 	Serial.flush();
-	if (!Maintanance_mode && ErrorCount == 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0)   // Only sleep if lights off
+	if (!Maintanance_mode && ErrorCount == 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0 &&DisplayCountDownSec <= 0)   // Only sleep if lights off
 	{
 		// Display_sleeping();
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
@@ -268,10 +269,10 @@ void loop()
 		Serial.println("Going to sleep");
 		esp_light_sleep_start();
 		Serial.println("Back awake");
-//		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
+		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
 	else
-		delay(1000);
+		delay(100);
 	
 	Check_buttoms();
 }

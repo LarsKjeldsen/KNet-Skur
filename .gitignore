@@ -263,3 +263,4 @@ __pycache__/
 .pio/
 .vscode/
 WIFI-Secret.h
+.vscode/c_cpp_properties.json

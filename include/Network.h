@@ -5,7 +5,7 @@
 
 #include "Reading.h"
 #include "Arduino.h"
-#include <PubSubClient.h>
+#include <MQTT.h>
 #include <HTTPClient.h>
 #include <cJSON.h>
 
@@ -18,7 +18,7 @@ bool WiFi_Setup(int ErrorCount = 200);
 void WiFi_disconnect();
 bool MQTT_Setup();
 void OTA_Setup();
-bool MQTT_Loop();
+void MQTT_Loop();
 bool SendMQTT(const char *Topic, char *payload);
 bool SendMQTT(const char *Topic, int32_t payload);
 bool SendMQTT(const char *Topic, float payload);

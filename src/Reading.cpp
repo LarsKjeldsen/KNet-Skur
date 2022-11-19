@@ -6,6 +6,7 @@
 
 Reading::Reading()
 {
+	return;  // LSKLSKLSK
 	Solar1.begin(&Wire1);
 	Solar2.begin(&Wire1);
 	Charger.begin(&Wire1);
@@ -51,6 +52,7 @@ Reading::Reading()
 
 void Reading::Get_weather()
 {
+	return; // LSKLSKLSK
 	bme.takeForcedMeasurement();
 
 	Temp = bme.readTemperature();  // Read temp before pressure
@@ -65,6 +67,8 @@ void Reading::Get_weather()
 
 void Reading::Get_power()
 {
+	return; // LSKLSKLSK
+
 	Solar1_V = Solar1.getBusVoltage_V();
 	Solar1_mA = Solar1.getCurrent_mA();
 	Solar2_V = Solar2.getBusVoltage_V();
@@ -96,6 +100,8 @@ void Reading::Get_power()
 
 void Reading::Get_WaterReading()
 {
+	return; // LSKLSKLSK
+
 	Vandstand_mm = Dist_single_reading();
 }
 

@@ -6,11 +6,6 @@
 #include <Update.h>
 #include <HttpsOTAUpdate.h>
 #include <ArduinoOTA.h>
-// #include <Adafruit_SPIDevice.h>
-// #include <Adafruit_I2CRegister.h>
-// #include <Adafruit_I2CDevice.h>
-// #include <Adafruit_BusIO_Register.h>
-// #include <Adafruit_Sensor.h>
 #include <AsyncUDP.h>
 #include <WiFi.h>
 #include <WiFiType.h>
@@ -29,7 +24,6 @@
 #include <SPI.h>
 #include <Adafruit_INA219.h>
 #include "INA3221.h"
-#include <PubSubClient.h>
 #include <Ticker.h>
 #include "HW.h"
 #include "Reading.h"
@@ -205,6 +199,7 @@ void setup()
 
 void loop()
 {
+	Serial.print('.');
 	unsigned long m = millis();
 
 	Update_timers();
@@ -212,19 +207,17 @@ void loop()
 	if (Maintanance_mode)
 		ArduinoOTA.handle();
 
-	MQTT_Loop();
-
 	if (millisec < m)
 	{
-		do	{  // Make sure we don't skip a sec.
-			millisec += 1000;
+		while (millisec < m) // Make sure we don't skip a sec.
+		{  
+ 			millisec += 1000;
 			Sec_Tick();
-		} while (millisec < m);
+		} 
 
 		reading->Get_WaterReading();
 		reading->Get_power();
 		reading->Get_weather();
-
 		Update_display();
 	}
 
@@ -236,14 +229,13 @@ void loop()
 		
 			ReadingCountDownSec = SEND_READING_INTERVAL;
 			ErrorCount = 0;
-			WiFi_disconnect();
 		}
-		else
-			ErrorCount++;
-
-		if (ErrorCount > 20)
+		else 
+		if (ErrorCount++ > 20)
 			My_Esp_Restart("ErrorCount to high");
 	}
+
+	MQTT_Loop();
 
 
 	if (LightCountDownSec <= 0)
@@ -267,6 +259,7 @@ void loop()
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 		Serial.println("Going to sleep");
+		WiFi.disconnect(true);
 		esp_light_sleep_start();
 		Serial.println("Back awake");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);

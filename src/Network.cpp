@@ -7,152 +7,126 @@
 char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
 
-const char clientId[] = "Skur_V2";
 
-IPAddress ip(192, 168, 1, 252);
-// IPAddress ip(192, 168, 1, 120); //DEBUG
+//IPAddress ip(192, 168, 1, 252);
+IPAddress ip(192, 168, 1, 201); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
+IPAddress MQTTServerIP(192, 168, 1, 21);
 
 WiFiClient ethClient;
-
-IPAddress MQTTServer(192, 168, 1, 21);
-PubSubClient MQTTclient(ethClient);
-
+MQTTClient MQTTclient;
 HTTPClient httpClient;
 
 
-void WiFi_disconnect()
-{
-	WiFi.disconnect(true);  // Disconnect from the network
-    WiFi.mode(WIFI_OFF); 	// Turn off WiFi modem
-}
 
 bool WiFi_Setup(int ErrorCount)
 { 
 	if (WiFi.status() == wl_status_t::WL_CONNECTED)
 		return true;
 
-	if (ErrorCount < 5)
-	{
-		Serial.print(" 1 ");
+	Serial.print("W1 "); Serial.println(WiFi.status());
 
-		WiFi.mode(WIFI_STA);
-		WiFi.config(ip, gw, mask);
-		WiFi.begin(ssid, password);
-		delay(500);
-		return (WiFi.status() == wl_status_t::WL_CONNECTED);
-	}
+	WiFi.disconnect(true);
+	WiFi.mode(WIFI_STA);
+	WiFi.config(ip, gw, mask);
 
-	if ((ErrorCount > 5) && (WiFi.status() != wl_status_t::WL_CONNECTED))
-	{
-		Serial.print(" 5 ");
-		WiFi.disconnect();
-
-		WiFi.mode(WIFI_STA);
-		WiFi.config(ip, gw, mask);
-		WiFi.begin(ssid, password);
-		delay(500);
-		return (WiFi.status() == wl_status_t::WL_CONNECTED);
-	}
-
+	WiFi.begin(ssid, password);
+	delay(500);
 	return (WiFi.status() == wl_status_t::WL_CONNECTED);
 }
 
 
 bool MQTT_Setup()
 {
-	if (!MQTTclient.connected()) 
+	if (not MQTTclient.connected()) 
 	{
-		Serial.print(" , ");
-		MQTTclient.setServer(MQTTServer, 1883);
-		MQTTclient.setSocketTimeout(120);
+		if (WiFi.status() != wl_status_t::WL_CONNECTED)
+			WiFi_Setup(0);
+		Serial.print("M1 ");
+		MQTTclient.begin(MQTTServerIP, ethClient);
 		MQTTclient.setKeepAlive(120);
-		MQTTclient.connect(clientId);
+		MQTTclient.connect("KNet-Skur-V3");
 		delay(250);
 	}
 
-	if (MQTTclient.connected())
-		return true;
-	else
-		Serial.println('M');
-	return false;
+	return MQTTclient.connected();
 }
 
 
-bool MQTT_Loop()
+void MQTT_Loop()
 {
-	return MQTTclient.loop();
+	MQTTclient.loop();
 }
+
 
 bool Send_reading(Reading* r, int ErrorCount)
 {
-	if (WiFi.status() != WL_CONNECTED)
-		if (! WiFi_Setup(ErrorCount))
-		{
-			Serial.println("WiFi not connected");
-			return false;
-		}
-//	delay(500);
+	if (not WiFi_Setup(ErrorCount))
+	{
+		Serial.println("WiFi not connected");
+		return false;
+	}
 
-	if (!MQTTclient.connected())
-		if ( ! MQTT_Setup())
-		{
-			Serial.println("MQTT not connected");
-			return false;
-		}
-	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V);     delay(10);
-	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);   delay(10);
-	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);   delay(10);
-	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(10);
-	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V);   delay(10);
-	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);     delay(10);
-	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);
+	if (not MQTT_Setup())
+	{
+		Serial.println("MQTT not connected");
+		return false;
+	}
+
+	SendMQTT("KNetT/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(100);
+	SendMQTT("KNetT/Haven/Skur/Solar1_V", r->Solar1_V);     delay(100);
+	SendMQTT("KNetT/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(100);
+	SendMQTT("KNeeT/Haven/Skur/Solar2_V", r->Solar2_V);     delay(100);
+	SendMQTT("KNetT/Haven/Skur/Battery_mA", r->Load1_mA);   delay(100);
+	SendMQTT("KNetT/Haven/Skur/Battery_V", r->Battery_V);   delay(100);
+	SendMQTT("KNetT/Haven/Skur/Charger_mA", r->Charger_mA); delay(100);
+	SendMQTT("KNetT/Haven/Skur/Charger_V", r->Charger_V);   delay(100);
+	SendMQTT("KNetT/Haven/Skur/Load1_mA", r->Load1_mA);     delay(100);
+	SendMQTT("KNetT/Haven/Skur/Load2_mA", r->Load2_mA);     delay(100);
+	SendMQTT("KNetT/Haven/Skur/Load3_mA", r->Load3_mA);     delay(100);
+	SendMQTT("KNetT/Haven/Skur/Load4_mA", r->Load4_mA);
 	
-	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);      delay(10);
-	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);      delay(10);
-	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);      delay(10);
+	SendMQTT("KNetT/Haven/Vejr/Temperatur", r->Temp);      delay(100);
+	SendMQTT("KNetT/Haven/Vejr/Fugtighed", r->Humid);      delay(100);
+	SendMQTT("KNetT/Haven/Vejr/Lufttryk", r->Press);       delay(100);
 
 	if (r->Vandstand_mm != 0) 
-		SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
+		SendMQTT("KNetT/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
 
-	delay(2000);
+	delay(3000);
 
 	Maintanance_mode = GetStatusCode();
 
 	return true;
 }
 
-bool SendMQTT(const char* Topic, int32_t payload)
+bool SendMQTT(const char* topic, int32_t payload)
 {
 	bool ret;
 
 	char s[20];
 	itoa(payload, s, 10);
-	ret = MQTTclient.publish(Topic, s, false);
+	ret = MQTTclient.publish(topic, s, strlen(s));
 	return (ret);
 }
 
-bool SendMQTT(const char* Topic, float payload)
+bool SendMQTT(const char* topic, float payload)
 {
+	return true;
 	bool ret;
 
 	char s[30];
 	dtostrf(payload, 5, 2, s);
-	ret = MQTTclient.publish(Topic, s, false);
+	ret = MQTTclient.publish(topic, s, strlen(s));
 	return (ret);
 }
 
-bool SendMQTT(const char* Topic, char *payload)
+bool SendMQTT(const char* topic, char *payload)
 {
 	bool ret;
 
-	ret = MQTTclient.publish(Topic, payload, false);
+	ret = MQTTclient.publish(topic, payload, strlen(payload));
 	return (ret);
 }
 

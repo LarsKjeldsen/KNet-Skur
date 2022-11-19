@@ -25,9 +25,9 @@ bool WiFi_Setup(int ErrorCount)
 	if (WiFi.status() == wl_status_t::WL_CONNECTED)
 		return true;
 
-	Serial.print("W1 "); Serial.println(WiFi.status());
+	Serial.printf("W1 %d %d \n", ErrorCount, WiFi.status());
 
-	WiFi.disconnect(true);
+	WiFi.disconnect(false);
 	WiFi.mode(WIFI_STA);
 	WiFi.config(ip, gw, mask);
 

@@ -234,7 +234,7 @@ void loop()
 			My_Esp_Restart("ErrorCount to high");
 	}
 
-	MQTT_Loop();
+//	MQTT_Loop();
 
 
 	if (LightCountDownSec <= 0)
@@ -257,10 +257,10 @@ void loop()
 		rtc_gpio_hold_en(L1); rtc_gpio_hold_en(L2);	rtc_gpio_hold_en(L3); rtc_gpio_hold_en(RELAY);
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
-		Serial.println("Going to sleep");
+//		Serial.println("Going to sleep");
 		WiFi.disconnect(true);
 		esp_light_sleep_start();
-		Serial.println("Back awake");
+//		Serial.println("Back awake");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);
 	}
 	else

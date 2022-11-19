@@ -8,8 +8,8 @@ char ssid[] = SSID_NAME;
 char password[] = PASSWORD;
 
 
-//IPAddress ip(192, 168, 1, 252);
-IPAddress ip(192, 168, 1, 201); //DEBUG
+IPAddress ip(192, 168, 1, 252);
+//IPAddress ip(192, 168, 1, 201); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 IPAddress MQTTServerIP(192, 168, 1, 21);
@@ -74,27 +74,27 @@ bool Send_reading(Reading* r, int ErrorCount)
 		return false;
 	}
 
-	SendMQTT("KNetT/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(100);
-	SendMQTT("KNetT/Haven/Skur/Solar1_V", r->Solar1_V);     delay(100);
-	SendMQTT("KNetT/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(100);
-	SendMQTT("KNeeT/Haven/Skur/Solar2_V", r->Solar2_V);     delay(100);
-	SendMQTT("KNetT/Haven/Skur/Battery_mA", r->Load1_mA);   delay(100);
-	SendMQTT("KNetT/Haven/Skur/Battery_V", r->Battery_V);   delay(100);
-	SendMQTT("KNetT/Haven/Skur/Charger_mA", r->Charger_mA); delay(100);
-	SendMQTT("KNetT/Haven/Skur/Charger_V", r->Charger_V);   delay(100);
-	SendMQTT("KNetT/Haven/Skur/Load1_mA", r->Load1_mA);     delay(100);
-	SendMQTT("KNetT/Haven/Skur/Load2_mA", r->Load2_mA);     delay(100);
-	SendMQTT("KNetT/Haven/Skur/Load3_mA", r->Load3_mA);     delay(100);
-	SendMQTT("KNetT/Haven/Skur/Load4_mA", r->Load4_mA);
+	SendMQTT("KNet/Haven/Vejr/Temperatur", r->Temp);      delay(100);
+	SendMQTT("KNet/Haven/Vejr/Fugtighed", r->Humid);      delay(100);
+	SendMQTT("KNet/Haven/Vejr/Lufttryk", r->Press);       delay(100);
+
+	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(100);
+	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(100);
+	SendMQTT("KNee/Haven/Skur/Solar2_V", r->Solar2_V);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);   delay(100);
+	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);   delay(100);
+	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(100);
+	SendMQTT("KNet/Haven/Skur/Charger_V", r->Charger_V);   delay(100);
+	SendMQTT("KNet/Haven/Skur/Load1_mA", r->Load1_mA);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Load2_mA", r->Load2_mA);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Load3_mA", r->Load3_mA);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Load4_mA", r->Load4_mA);     delay(100);
 	
-	SendMQTT("KNetT/Haven/Vejr/Temperatur", r->Temp);      delay(100);
-	SendMQTT("KNetT/Haven/Vejr/Fugtighed", r->Humid);      delay(100);
-	SendMQTT("KNetT/Haven/Vejr/Lufttryk", r->Press);       delay(100);
-
 	if (r->Vandstand_mm != 0) 
-		SendMQTT("KNetT/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
+		SendMQTT("KNet/Haven/Regn/vandstand_mm", (int32_t)r->Vandstand_mm); delay(10);
 
-	delay(3000);
+	delay(1000);
 
 	Maintanance_mode = GetStatusCode();
 
@@ -103,31 +103,17 @@ bool Send_reading(Reading* r, int ErrorCount)
 
 bool SendMQTT(const char* topic, int32_t payload)
 {
-	bool ret;
-
-	char s[20];
-	itoa(payload, s, 10);
-	ret = MQTTclient.publish(topic, s, strlen(s));
-	return (ret);
+	return (MQTTclient.publish(topic, String(payload)));
 }
 
 bool SendMQTT(const char* topic, float payload)
 {
-	return true;
-	bool ret;
-
-	char s[30];
-	dtostrf(payload, 5, 2, s);
-	ret = MQTTclient.publish(topic, s, strlen(s));
-	return (ret);
+	return (MQTTclient.publish(topic, String(payload)));
 }
 
 bool SendMQTT(const char* topic, char *payload)
 {
-	bool ret;
-
-	ret = MQTTclient.publish(topic, payload, strlen(payload));
-	return (ret);
+	return(MQTTclient.publish(topic, payload));
 }
 
 

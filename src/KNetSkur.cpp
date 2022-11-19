@@ -199,7 +199,6 @@ void setup()
 
 void loop()
 {
-	Serial.print('.');
 	unsigned long m = millis();
 
 	Update_timers();

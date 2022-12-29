@@ -35,7 +35,7 @@
 Reading* reading;
 
 #define DISPLAY_ON_TIME 60 // 10 minute
-#define SEND_READING_INTERVAL 45
+#define SEND_READING_INTERVAL 25
 #define LIGHT_DELAY_SECOND 600  // 10 min.
 #define MAX_LOAD4_CHARGE_TIME 3600  // One hour
 
@@ -230,8 +230,8 @@ void loop()
 			ErrorCount = 0;
 		}
 		else 
-		if (ErrorCount++ > 20)
-			My_Esp_Restart("ErrorCount to high");
+			if (ErrorCount++ > 20)
+				My_Esp_Restart("ErrorCount to high");
 	}
 
 //	MQTT_Loop();

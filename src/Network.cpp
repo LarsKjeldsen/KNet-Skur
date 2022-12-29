@@ -81,7 +81,7 @@ bool Send_reading(Reading* r, int ErrorCount)
 	SendMQTT("KNet/Haven/Skur/Solar1_mA", r->Solar1_mA);   delay(100);
 	SendMQTT("KNet/Haven/Skur/Solar1_V", r->Solar1_V);     delay(100);
 	SendMQTT("KNet/Haven/Skur/Solar2_mA", r->Solar2_mA);   delay(100);
-	SendMQTT("KNee/Haven/Skur/Solar2_V", r->Solar2_V);     delay(100);
+	SendMQTT("KNet/Haven/Skur/Solar2_V", r->Solar2_V);     delay(100);
 	SendMQTT("KNet/Haven/Skur/Battery_mA", r->Load1_mA);   delay(100);
 	SendMQTT("KNet/Haven/Skur/Battery_V", r->Battery_V);   delay(100);
 	SendMQTT("KNet/Haven/Skur/Charger_mA", r->Charger_mA); delay(100);

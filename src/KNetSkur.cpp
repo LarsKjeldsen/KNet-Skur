@@ -192,8 +192,13 @@ void setup()
 	touchAttachInterrupt(TOUCH5_Pin, TouchCallback5, TOUCH_TRESHOLD);
 
 	//Configure Touchpad as wakeup source
-	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
-	esp_sleep_enable_touchpad_wakeup();
+//	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
+//	esp_sleep_enable_touchpad_wakeup();
+	touchSleepWakeUpEnable(TOUCH1_Pin, TOUCH_TRESHOLD);
+	touchSleepWakeUpEnable(TOUCH2_Pin, TOUCH_TRESHOLD);
+	touchSleepWakeUpEnable(TOUCH3_Pin, TOUCH_TRESHOLD);
+	touchSleepWakeUpEnable(TOUCH4_Pin, TOUCH_TRESHOLD);
+	touchSleepWakeUpEnable(TOUCH5_Pin, TOUCH_TRESHOLD);
 }
 
 

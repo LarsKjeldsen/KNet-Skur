@@ -12,7 +12,7 @@ IPAddress ip(192, 168, 1, 252);
 //IPAddress ip(192, 168, 1, 201); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
-IPAddress MQTTServerIP(192, 168, 1, 21);
+IPAddress MQTTServerIP(192, 168, 1, 22);
 
 WiFiClient ethClient;
 MQTTClient MQTTclient;
@@ -118,7 +118,7 @@ bool SendMQTT(const char* topic, char *payload)
 
 int GetStatusCode()
 {
-	httpClient.begin("http://192.168.1.20:8123/api/states/input_boolean.skur_debug");
+	httpClient.begin("http://192.168.1.22:8123/api/states/input_boolean.skur_debug");
 	httpClient.setReuse(false);
 	httpClient.addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2YWJiZDM4Yzc2YTk0ZTQ4YTg3YTlkM2FkOGFkNDVkZiIsImlhdCI6MTY2NzY0NTY4MywiZXhwIjoxOTgzMDA1NjgzfQ.-QBAQvT2DCn8UPiw7oTD_iGXMnExdsBvFh1-X8DBmJo");
 	httpClient.addHeader("Content-Type", "application/json");

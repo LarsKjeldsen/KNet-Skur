@@ -37,7 +37,7 @@ Reading* reading;
 #define DISPLAY_ON_TIME 60 // 10 minute
 #define SEND_READING_INTERVAL 25
 #define LIGHT_DELAY_SECOND 600  // 10 min.
-#define MAX_LOAD4_CHARGE_TIME 3600  // One hour
+#define MAX_LOAD4_CHARGE_TIME 7200  // One hour
 
 int Next_reading = 0;
 int ErrorCount;

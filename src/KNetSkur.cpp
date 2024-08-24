@@ -1,4 +1,4 @@
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <WiFiClientSecure.h>
 #include <ssl_client.h>
 #include <HTTPClient.h>
@@ -37,7 +37,7 @@ Reading* reading;
 #define DISPLAY_ON_TIME 60 // 10 minute
 #define SEND_READING_INTERVAL 25
 #define LIGHT_DELAY_SECOND 600  // 10 min.
-#define MAX_LOAD4_CHARGE_TIME 7200  // One hour
+#define MAX_LOAD4_CHARGE_TIME 7200  // two hour
 
 int Next_reading = 0;
 int ErrorCount;
@@ -219,14 +219,16 @@ void loop()
 			Sec_Tick();
 		} 
 
-		reading->Get_WaterReading();
 		reading->Get_power();
 		reading->Get_weather();
+
 		Update_display();
 	}
 
 	if (ReadingCountDownSec <= 0)
 	{
+		reading->Get_WaterReading();
+		
 		if (Send_reading(reading, ErrorCount))
 		{
 			Serial.println("Sending reading");

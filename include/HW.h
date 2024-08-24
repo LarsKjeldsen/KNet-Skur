@@ -1,7 +1,7 @@
 
 #ifndef _HW_h
 #define _HW_h
-#include "Arduino.h"
+//#include "Arduino.h"
 #include "driver/rtc_io.h"
 #include <Ticker.h>
 #include "Display.h"

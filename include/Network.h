@@ -4,7 +4,7 @@
 #define _NETWORK_h
 
 #include "Reading.h"
-#include "Arduino.h"
+//#include "Arduino.h"
 #include <MQTT.h>
 #include <HTTPClient.h>
 #include <cJSON.h>

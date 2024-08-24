@@ -17,7 +17,7 @@ unsigned int Dist_get_reading()
 
 	unsigned int Reading = Dist_single_reading();
 
-//	Serial.print(Reading); Serial.print('|'); // Serial.print(WaterPointer); Serial.print('|');
+	Serial.print(Reading); Serial.print('|'); // Serial.print(WaterPointer); Serial.print('|');
 	if (Reading != 0)
 	{
 		WaterPointer++;
@@ -36,10 +36,10 @@ unsigned int Dist_get_reading()
 
 	for (int i = 0; i < NUM_WATER_READINGS; i++) {
 		ava += WaterLevel[i];
-//		Serial.print(WaterLevel[i]); Serial.print('-');
+		Serial.print(WaterLevel[i]); Serial.print('-');
 	}
 
-//	Serial.println();
+	Serial.println();
 
 	PreAvarage = ava / NUM_WATER_READINGS;
 	return  PreAvarage;
@@ -67,9 +67,9 @@ unsigned int Dist_single_reading()
 	Data_L = ReadByte(TIMEOUT);
 	checksum = ReadByte(TIMEOUT);
 
-//Serial.print(Data_H, HEX); Serial.print(":");
-//Serial.print(Data_L, HEX); Serial.print(":");
-//Serial.print(checksum, HEX); Serial.print(": ");
+Serial.print(Data_H, HEX); Serial.print(":");
+Serial.print(Data_L, HEX); Serial.print(":");
+Serial.print(checksum, HEX); Serial.print(": ");
 
 	unsigned char sum;
 	sum = (Data_H + Data_L + 0xff) & 0xFF;
@@ -92,19 +92,19 @@ unsigned int Dist_single_reading()
 
 
 int ReadByte(int timeout)
+
+
 {
 	unsigned long t = millis() + timeout;
 
 	while (millis() < t)
 	{
-		//		Serial.print('.');
-
 		if (Serial2.available()) {
 			int c = Serial2.read();
 //			Serial.print(c, HEX); Serial.print(',');
 			return c;
 		}
-//		delay(20);
+		delay(20);
 	}
 	return -1;
 }

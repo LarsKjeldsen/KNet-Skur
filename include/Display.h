@@ -3,7 +3,7 @@
 #ifndef _DISPLAY_h
 #define _DISPLAY_h
 
-#include "Arduino.h"
+//#include "Arduino.h"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "Reading.h"

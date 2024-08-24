@@ -3,7 +3,7 @@
 #ifndef _READING_h
 #define _READING_h
 
-#include "Arduino.h"
+//#include "Arduino.h"
 #include <Wire.h>
 // #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>

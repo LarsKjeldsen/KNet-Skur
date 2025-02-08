@@ -85,12 +85,6 @@ void CheckForError()
 }
 
 
-void Update_timers()
-{
-	unsigned long m = millis();
-	Count_Sec = m / 1000ul;
-}
-
 void Update_display()
 {
 	Display_Solar(reading);
@@ -139,7 +133,13 @@ void Check_buttoms()
 	{
 		DisplayCountDownSec = 0;
 		Load4ChargeCountDownSec = 0;
-		LightCountDownSec = 3; // Delay 3 to turn off light
+		if (LightCountDownSec != 0)
+		{  // If we have light, we blink for 20ms
+			LIGHT1_OFF;
+			delay(200);
+			LIGHT1_ON;
+		}
+		LightCountDownSec = 5; // Delay 3 to turn off light
 		Touch5 = false;
 	}
 }
@@ -193,7 +193,7 @@ void setup()
 
 	//Configure Touchpad as wakeup source
 //	esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_AUTO);
-//	esp_sleep_enable_touchpad_wakeup();
+	esp_sleep_enable_touchpad_wakeup();
 	touchSleepWakeUpEnable(TOUCH1_Pin, TOUCH_TRESHOLD);
 	touchSleepWakeUpEnable(TOUCH2_Pin, TOUCH_TRESHOLD);
 	touchSleepWakeUpEnable(TOUCH3_Pin, TOUCH_TRESHOLD);
@@ -206,7 +206,7 @@ void loop()
 {
 	unsigned long m = millis();
 
-	Update_timers();
+	Count_Sec = m / 1000ul;
 
 	if (Maintanance_mode)
 		ArduinoOTA.handle();
@@ -241,9 +241,6 @@ void loop()
 				My_Esp_Restart("ErrorCount to high");
 	}
 
-//	MQTT_Loop();
-
-
 	if (LightCountDownSec <= 0)
 	{
 		LIGHT1_OFF;
@@ -255,9 +252,6 @@ void loop()
 	if (DisplayCountDownSec <= 0)
 		ControlBacklight(false);
 
-	if (ErrorCount > 0)	
-		Serial.printf("ReadingCountDownSec: %d, Maint: %d, ErrorCount: %d, LightCountDownSec: %d, Load4ChargeCountDownSec: %d\n",ReadingCountDownSec, Maintanance_mode, ErrorCount, LightCountDownSec, Load4ChargeCountDownSec);
-	Serial.flush();
 	if (!Maintanance_mode && ErrorCount == 0 && LightCountDownSec <= 0 && Load4ChargeCountDownSec <= 0 &&DisplayCountDownSec <= 0)   // Only sleep if lights off
 	{
 		// Display_sleeping();
@@ -265,7 +259,7 @@ void loop()
 		gpio_deep_sleep_hold_en();
 		esp_sleep_enable_timer_wakeup(10UL * 1000000UL);
 //		Serial.println("Going to sleep");
-		WiFi.disconnect(true);
+//		WiFi.disconnect(true);
 		esp_light_sleep_start();
 //		Serial.println("Back awake");
 		gpio_hold_dis(L1); gpio_hold_dis(L2); gpio_hold_dis(L3); gpio_hold_dis(RELAY);

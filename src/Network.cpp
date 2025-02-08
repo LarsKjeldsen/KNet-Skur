@@ -9,7 +9,6 @@ char password[] = PASSWORD;
 
 
 IPAddress ip(192, 168, 1, 252);
-//IPAddress ip(192, 168, 1, 201); //DEBUG
 IPAddress gw(192, 168, 1, 1);
 IPAddress mask(255, 255, 255, 0);
 IPAddress MQTTServerIP(192, 168, 1, 22);
